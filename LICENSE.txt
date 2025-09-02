@@ -1,0 +1,183 @@
+# Biological Research Public License (BRPL)
+### Version 1.0, September 2025
+
+---
+
+## Preamble
+
+The Biological Research Public License (BRPL) is designed specifically for software projects that incorporate biological research, medical knowledge, or biomimetic algorithms. This license ensures that scientific research remains open and accessible while protecting the integrity of biological research and requiring proper attribution to the scientific community that enables such innovations.
+
+This license recognizes that software implementing biological mechanisms stands on the shoulders of decades of scientific research, medical studies, and clinical observations. It aims to foster continued scientific collaboration while preventing exploitation of research-derived intellectual property.
+
+---
+
+## Terms and Conditions
+
+### 1. Definitions
+
+**"Biological Work"** refers to any software, algorithm, or computational model that:
+- Implements or simulates biological processes, mechanisms, or systems
+- Is derived from medical, biological, or neuroscientific research
+- Claims biological accuracy or biomimetic functionality
+- Uses terminology, concepts, or methods from life sciences
+
+**"Research Citation Requirements"** means proper academic attribution to all biological research, medical studies, and scientific publications that informed the development of the Biological Work.
+
+**"Commercial Use"** means any use of the Biological Work for direct or indirect financial gain, including but not limited to:
+- Integration into commercial products or services
+- Use in proprietary research and development
+- Implementation in revenue-generating applications
+- Licensing to third parties for commercial purposes
+
+**"Research Partner"** means an accredited academic institution, research hospital, or recognized scientific organization engaged in biological, medical, or neuroscientific research.
+
+**"Community Contribution"** means any improvement, modification, or enhancement to the Biological Work that increases its biological accuracy, performance, or research value.
+
+### 2. Grant of Rights
+
+Subject to the terms and conditions of this license, the copyright holders grant you:
+
+**a) Research and Educational Rights**: A worldwide, royalty-free, non-exclusive license to use, study, modify, and distribute the Biological Work for research, educational, and non-commercial purposes.
+
+**b) Attribution Rights**: The right to properly attribute the biological research underlying the Biological Work, including all scientific publications and research methodologies referenced.
+
+**c) Improvement Rights**: The right to create derivative works that enhance the biological accuracy or functionality of the Biological Work, subject to contribution requirements.
+
+### 3. Research Citation Obligations
+
+You must include and maintain:
+
+**a) Scientific Bibliography**: A comprehensive bibliography of all biological research, medical studies, and scientific publications that informed the Biological Work, formatted according to academic standards.
+
+**b) Biological Accuracy Disclaimers**: Clear statements regarding the limitations of biological simulation and any deviations from actual biological processes.
+
+**c) Research Methodology Attribution**: Proper attribution to research methods, experimental protocols, and biological principles implemented in the software.
+
+**d) Institutional Acknowledgments**: Recognition of research institutions, laboratories, and funding sources that contributed to the underlying biological knowledge.
+
+### 4. Community Contribution Requirements
+
+Any modification or improvement to the Biological Work must:
+
+**a) Biological Validation**: Include evidence of biological accuracy through peer review, clinical validation, or academic collaboration.
+
+**b) Open Research**: Be made publicly available under this same license within 12 months of creation.
+
+**c) Scientific Rigor**: Maintain the same standards of biological accuracy and research citation as the original work.
+
+**d) Collaborative Development**: Be developed in consultation with relevant biological research experts when making significant biological claims.
+
+### 5. Commercial Use Restrictions
+
+Commercial use of the Biological Work requires:
+
+**a) Partnership Agreement**: A formal partnership with the original research team or designated research institution.
+
+**b) Research Contribution**: Ongoing contribution to biological research through funding, data sharing, or collaborative studies.
+
+**c) Ethical Review**: Independent ethical review for applications involving human subjects, medical data, or clinical implementations.
+
+**d) Revenue Sharing**: A percentage of commercial revenue (minimum 2%) directed toward biological research funding in relevant fields.
+
+### 6. Biological Ethics Compliance
+
+All use of the Biological Work must:
+
+**a) Medical Ethics**: Comply with relevant medical research ethics, including IRB approval for human subjects research.
+
+**b) Animal Research**: Follow established guidelines for any research involving animal models or animal-derived data.
+
+**c) Data Privacy**: Protect biological and medical data according to applicable privacy regulations (HIPAA, GDPR, etc.).
+
+**d) Research Integrity**: Maintain scientific integrity and accuracy in any biological claims or medical applications.
+
+### 7. Patent and Intellectual Property
+
+**a) Defensive Patent Pledge**: Contributors agree not to assert patents against users of the Biological Work for research or educational purposes.
+
+**b) Biological Knowledge Commons**: Acknowledgment that fundamental biological processes and mechanisms cannot be patented and belong to the scientific commons.
+
+**c) Research Tool Exception**: Use of the Biological Work in research tools and platforms is explicitly permitted regardless of commercial nature of the platform.
+
+### 8. Quality and Safety Standards
+
+**a) Biological Accuracy**: Modifications must not knowingly reduce biological accuracy or introduce scientifically invalid claims.
+
+**b) Medical Safety**: Any medical applications must include appropriate safety warnings and professional consultation requirements.
+
+**c) Research Standards**: All biological claims must be substantiated by peer-reviewed research or clearly marked as experimental.
+
+### 9. Termination
+
+This license terminates automatically if you:
+- Fail to provide required research citations
+- Make false claims about biological accuracy
+- Use the Biological Work for commercial purposes without proper partnerships
+- Violate biological research ethics or safety standards
+
+### 10. Disclaimer of Warranties
+
+THE BIOLOGICAL WORK IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. THE COPYRIGHT HOLDERS MAKE NO WARRANTIES REGARDING BIOLOGICAL ACCURACY, MEDICAL SAFETY, OR FITNESS FOR CLINICAL USE.
+
+**MEDICAL DISCLAIMER**: This software is for research purposes only and is not intended for medical diagnosis, treatment, or clinical decision-making without appropriate professional oversight.
+
+### 11. Limitation of Liability
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY BIOLOGICAL INACCURACIES, MEDICAL MISUSE, OR RESEARCH MISAPPLICATION OF THE BIOLOGICAL WORK.
+
+### 12. Scientific Community Obligations
+
+Users of the Biological Work agree to:
+
+**a) Research Sharing**: Share relevant research findings that emerge from use of the Biological Work with the scientific community.
+
+**b) Collaboration**: Participate in good faith in scientific peer review and collaborative validation efforts.
+
+**c) Education**: Support educational use of the Biological Work in academic settings.
+
+**d) Ethical Standards**: Uphold the highest standards of scientific ethics and research integrity.
+
+---
+
+## Special Provisions
+
+### Research Institution Privileges
+Accredited research institutions, teaching hospitals, and non-profit research organizations receive additional privileges:
+- Extended modification rights for research purposes
+- Reduced attribution requirements for internal research
+- Priority access to research data and collaboration opportunities
+- Exemption from certain commercial use restrictions for educational technology
+
+### Open Science Commitment
+This license embodies a commitment to open science principles:
+- All biological research underlying the software should be openly accessible
+- Research methodologies should be transparent and reproducible
+- Scientific findings should benefit the global research community
+- Biological knowledge should remain in the commons for future generations
+
+### International Collaboration
+This license explicitly encourages international scientific collaboration and recognizes that biological research is a global endeavor transcending national boundaries.
+
+---
+
+## Adoption and Recognition
+
+Organizations using the Biological Research Public License agree to:
+1. Display the BRPL badge in project documentation
+2. Participate in annual biological accuracy assessments
+3. Contribute to the collective biological knowledge base
+4. Support the development of open biological research tools
+
+---
+
+**License Registry**: For official recognition and partnership opportunities, register BRPL projects at: [brpl-registry.org](https://brpl-registry.org)
+
+**Scientific Advisory Board**: The BRPL is overseen by a board of leading researchers in biology, medicine, computer science, and research ethics.
+
+---
+
+*The Biological Research Public License represents a new paradigm in open source licensing - one that honors the scientific research foundation upon which biomimetic technologies are built, while ensuring continued innovation benefits all of humanity.*
+
+**© 2025 Biological Research Public License Consortium**  
+**Version 1.0 - Initial Release**  
+**Contact**: license@brpl.org
