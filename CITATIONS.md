@@ -406,7 +406,7 @@ All research cited in this bibliography remains the intellectual property of the
 **Citation Format**: When referencing Biomimetain academic work, please use:
 ```
 Qiss, N. (2025). Biomimeta: Biomimetic Video Compression Engine. 
-Biological Research Public License. https://github.com/neo-qiss/biomimeta
+Biological Research Public License. https://github.com/iamqiss/biomimeta
 ```
 
 **Research Collaboration**: For academic collaboration or validation studies, contact: research@biomimeta.com
