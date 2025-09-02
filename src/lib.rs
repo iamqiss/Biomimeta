@@ -17,10 +17,10 @@ use std::fmt;
 
 /// Core visual system that orchestrates all biological processing components
 pub struct VisualSystem {
-    retinal_processor: retinal_processing::RetinalProcessor,
-    cortical_processor: cortical_processing::CorticalProcessor,
-    synaptic_adapter: synaptic_adaptation::SynapticAdapter,
-    perceptual_optimizer: perceptual_optimization::PerceptualOptimizer,
+    pub retinal_processor: retinal_processing::RetinalProcessor,
+    pub cortical_processor: cortical_processing::CorticalProcessor,
+    pub synaptic_adapter: synaptic_adaptation::SynapticAdapter,
+    pub perceptual_optimizer: perceptual_optimization::PerceptualOptimizer,
 }
 
 impl VisualSystem {

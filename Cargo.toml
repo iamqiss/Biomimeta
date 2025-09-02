@@ -18,3 +18,7 @@ anyhow = "1.0"
 assert_cmd = "2.0"
 predicates = "3.1"
 
+[[example]]
+name = "advanced_cortical_areas"
+path = "examples/advanced_cortical_areas.rs"
+
