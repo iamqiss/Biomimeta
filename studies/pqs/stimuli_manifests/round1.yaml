@@ -1,0 +1,5 @@
+clips:
+  - id: clip01
+    path: ../../data/pqs/clips/clip01_10s.mp4
+  - id: clip02
+    path: ../../data/pqs/clips/clip02_10s.mp4

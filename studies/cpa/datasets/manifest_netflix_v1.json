@@ -1,0 +1,6 @@
+{
+  "name": "netflix_v1",
+  "clips": [
+    {"id": "clip001", "path": "../../data/cpa/netflix/clip001.mp4", "hash": "dummyhash"}
+  ]
+}
