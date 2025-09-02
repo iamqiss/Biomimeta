@@ -1,0 +1,10 @@
+stimuli:
+  - id: grating_low
+    path: ../../data/bav/stimuli/gratings/grating_low.png
+    type: grating
+  - id: natural_clip_01
+    path: ../../data/bav/stimuli/natural/clip01.mp4
+    type: natural
+  - id: saccade_profile_01
+    path: ../../data/bav/stimuli/saccades/saccade1.json
+    type: saccade

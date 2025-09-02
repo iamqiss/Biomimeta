@@ -1,0 +1,6 @@
+{
+  "name": "uvg_v1",
+  "clips": [
+    {"id": "clip001", "path": "../../data/cpa/uvg/clip001.mp4", "hash": "dummyhash"}
+  ]
+}
