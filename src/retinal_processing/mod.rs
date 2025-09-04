@@ -4,6 +4,11 @@
 //! It models the complete retinal signal processing pipeline including photoreceptor sampling,
 //! bipolar cell networks, and ganglion cell pathways.
 
+pub mod photoreceptors;
+pub mod bipolar_cells;
+pub mod ganglion_pathways;
+pub mod amacrine_networks;
+
 use crate::AfiyahError;
 
 /// Main retinal processor that orchestrates all retinal processing stages
@@ -75,7 +80,7 @@ impl RetinalProcessor {
         Ok(())
     }
 
-    fn calculate_compression_ratio(&self, ganglion_response: &GanglionResponse) -> f64 {
+    fn calculate_compression_ratio(&self, ganglion_response: &ganglion_pathways::GanglionResponse) -> f64 {
         let total_activity = ganglion_response.magnocellular.len() + 
                            ganglion_response.parvocellular.len() + 
                            ganglion_response.koniocellular.len();
@@ -94,13 +99,7 @@ pub struct RetinalOutput {
     pub compression_ratio: f64,
 }
 
-/// Response from ganglion cell pathways
-#[derive(Debug, Clone)]
-pub struct GanglionResponse {
-    pub magnocellular: Vec<f64>,
-    pub parvocellular: Vec<f64>,
-    pub koniocellular: Vec<f64>,
-}
+// GanglionResponse is now defined in ganglion_pathways module
 
 /// Retinal adaptation state
 #[derive(Debug, Clone)]
@@ -128,57 +127,23 @@ pub struct RetinalCalibrationParams {
     pub adaptation_rate: f64,
 }
 
-// Placeholder implementations for the retinal components
-pub struct PhotoreceptorLayer;
-pub struct BipolarNetwork;
-pub struct GanglionPathways;
-pub struct AmacrineNetworks;
+// Use the actual photoreceptor layer implementation
+use photoreceptors::PhotoreceptorLayer;
 
-impl PhotoreceptorLayer {
-    pub fn new() -> Result<Self, AfiyahError> { Ok(Self) }
-    pub fn process(&self, _input: &crate::VisualInput) -> Result<PhotoreceptorResponse, AfiyahError> {
-        Ok(PhotoreceptorResponse {
-            rod_signals: vec![0.5; 1000],
-            cone_signals: vec![0.5; 2000],
-            adaptation_level: 0.5,
-        })
-    }
-    pub fn calibrate(&self, _params: &RetinalCalibrationParams) -> Result<(), AfiyahError> { Ok(()) }
-}
+// Use the actual bipolar network implementation
+use bipolar_cells::BipolarNetwork;
 
-impl BipolarNetwork {
-    pub fn new() -> Result<Self, AfiyahError> { Ok(Self) }
-    pub fn process(&self, _input: &PhotoreceptorResponse) -> Result<BipolarResponse, AfiyahError> {
-        Ok(BipolarResponse {
-            on_center: vec![0.5; 1000],
-            off_center: vec![0.5; 1000],
-        })
-    }
-    pub fn calibrate(&self, _params: &RetinalCalibrationParams) -> Result<(), AfiyahError> { Ok(()) }
-}
+// Use the actual ganglion pathways implementation
+use ganglion_pathways::GanglionPathways;
 
-impl GanglionPathways {
-    pub fn new() -> Result<Self, AfiyahError> { Ok(Self) }
-    pub fn process(&self, _input: &AmacrineResponse) -> Result<GanglionResponse, AfiyahError> {
-        Ok(GanglionResponse {
-            magnocellular: vec![0.5; 1000],
-            parvocellular: vec![0.5; 1000],
-            koniocellular: vec![0.5; 1000],
-        })
-    }
-    pub fn calibrate(&self, _params: &RetinalCalibrationParams) -> Result<(), AfiyahError> { Ok(()) }
-}
+// Use the actual amacrine networks implementation
+use amacrine_networks::AmacrineNetworks;
 
-impl AmacrineNetworks {
-    pub fn new() -> Result<Self, AfiyahError> { Ok(Self) }
-    pub fn process(&self, _input: &BipolarResponse) -> Result<AmacrineResponse, AfiyahError> {
-        Ok(AmacrineResponse {
-            lateral_inhibition: vec![0.5; 1000],
-            temporal_filtering: vec![0.5; 1000],
-        })
-    }
-    pub fn calibrate(&self, _params: &RetinalCalibrationParams) -> Result<(), AfiyahError> { Ok(()) }
-}
+// BipolarNetwork implementation is now in bipolar_cells module
+
+// GanglionPathways implementation is now in ganglion_pathways module
+
+// AmacrineNetworks implementation is now in amacrine_networks module
 
 #[derive(Debug, Clone)]
 pub struct PhotoreceptorResponse {
