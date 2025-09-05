@@ -1,216 +1,249 @@
+/* Biomimeta - Biomimetic Video Compression & Streaming Engine
+*  Copyright (C) 2025 Neo Qiss. All Rights Reserved.
+*
+*  PROPRIETARY NOTICE: This software and all associated intellectual property,
+*  including but not limited to algorithms, biological models, neural architectures,
+*  and compression methodologies, are the exclusive property of Neo Qiss.
+*
+*  COMMERCIAL RESTRICTION: Commercial use, distribution, or integration of this
+*  software is STRICTLY PROHIBITED without explicit written authorization and
+*  formal partnership agreements. Unauthorized commercial use constitutes
+*  copyright infringement and may result in legal action.
+*
+*  RESEARCH LICENSE: This software is made available under the Biological Research
+*  Public License (BRPL) v1.0 EXCLUSIVELY for academic research, educational purposes,
+*  and non-commercial scientific collaboration. Commercial entities must obtain
+*  separate licensing agreements.
+*
+*  BIOLOGICAL RESEARCH ATTRIBUTION: This software implements proprietary biological
+*  models derived from extensive neuroscientific research. All use must maintain
+*  complete scientific attribution as specified in the BRPL license terms.
+*
+*  NO WARRANTIES: This software is provided for research purposes only. No warranties
+*  are made regarding biological accuracy, medical safety, or fitness for any purpose.
+*
+*  For commercial licensing: commercial@biomimeta.com
+*  For research partnerships: research@biomimeta.com
+*  Legal inquiries: legal@biomimeta.com
+*
+*  VIOLATION OF THESE TERMS MAY RESULT IN IMMEDIATE LICENSE TERMINATION AND LEGAL ACTION.
+*/
+
 //! Advanced Cortical Areas Example
 //! 
-//! This example demonstrates the advanced cortical processing areas including
-//! V1 orientation filters, V5/MT motion processing, and real-time adaptation.
+//! This example demonstrates the complete Afiyah biomimetic visual processing pipeline,
+//! including retinal processing, V1 and V2 cortical processing, and synaptic adaptation.
 
 use afiyah::{
-    VisualSystem, CompressionEngine, CompressionConfig,
-    cortical_processing::{CorticalProcessor, CorticalProcessingConfig},
-    retinal_processing::RetinalOutput,
-    VisualInput,
+    CompressionEngine, VisualInput, InputMetadata, AfiyahError,
+    retinal_processing::{RetinalProcessor, RetinalCalibrationParams},
+    cortical_processing::V1::{V1Processor, V1Config},
+    cortical_processing::V2::{V2Processor, V2Config},
+    synaptic_adaptation::{SynapticAdaptation, AdaptationConfig},
 };
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("🧠 Afiyah Advanced Cortical Areas Demo");
-    println!("=====================================");
+fn main() -> Result<(), AfiyahError> {
+    println!("🧠👁️ Afiyah Advanced Cortical Areas Demo");
+    println!("==========================================");
     
-    // Create visual system with advanced cortical processing
-    let mut visual_system = VisualSystem::new()?;
+    // Create synthetic visual input
+    let visual_input = create_synthetic_visual_input()?;
+    println!("✅ Created synthetic visual input: {}x{} pixels", 
+             visual_input.spatial_resolution.0, visual_input.spatial_resolution.1);
     
-    // Create compression engine with biological configuration
-    let config = CompressionConfig::biological_default();
-    let mut compression_engine = CompressionEngine::new(config)?;
+    // Initialize retinal processor
+    let mut retinal_processor = RetinalProcessor::new()?;
+    println!("✅ Initialized retinal processor");
     
-    // Create cortical processor with advanced features
-    let mut cortical_processor = CorticalProcessor::new()?;
-    
-    // Configure cortical processing
-    let cortical_config = CorticalProcessingConfig {
-        orientation_enabled: true,
-        motion_enabled: true,
-        adaptation_enabled: true,
-        processing_resolution: (128, 128),
-        adaptation_window_ms: 200,
+    // Calibrate retinal processor
+    let retinal_params = RetinalCalibrationParams {
+        rod_sensitivity: 1.0,
+        cone_sensitivity: 1.0,
+        adaptation_rate: 0.1,
     };
-    cortical_processor.set_config(cortical_config);
+    retinal_processor.calibrate(&retinal_params)?;
+    println!("✅ Calibrated retinal processor");
     
-    // Enable real-time adaptation
-    cortical_processor.set_adaptation_enabled(true);
-    
-    println!("✅ Advanced cortical areas initialized");
-    println!("   - V1 Orientation Filters: 8 orientations");
-    println!("   - V5/MT Motion Processing: 8 directions");
-    println!("   - Real-time Adaptation: Enabled");
-    
-    // Create sample visual input
-    let visual_input = create_sample_visual_input();
-    
-    println!("\n📊 Processing visual input through cortical pipeline...");
-    
-    // Process through retinal stage
-    let retinal_output = visual_system.retinal_processor.process(&visual_input)?;
-    println!("✅ Retinal processing complete");
+    // Process through retinal layer
+    let retinal_output = retinal_processor.process(&visual_input)?;
+    println!("✅ Retinal processing complete:");
     println!("   - Magnocellular stream: {} samples", retinal_output.magnocellular_stream.len());
     println!("   - Parvocellular stream: {} samples", retinal_output.parvocellular_stream.len());
     println!("   - Koniocellular stream: {} samples", retinal_output.koniocellular_stream.len());
     println!("   - Adaptation level: {:.3}", retinal_output.adaptation_level);
     println!("   - Compression ratio: {:.1}%", retinal_output.compression_ratio * 100.0);
     
-    // Process through cortical stage
-    let cortical_output = cortical_processor.process(&retinal_output)?;
-    println!("✅ Cortical processing complete");
-    println!("   - Orientation maps: {}", cortical_output.orientation_maps.len());
-    println!("   - Motion vectors: {}", cortical_output.motion_vectors.len());
-    println!("   - Depth maps: {}", cortical_output.depth_maps.len());
-    println!("   - Cortical compression: {:.1}%", cortical_output.cortical_compression * 100.0);
+    // Initialize V1 processor
+    let v1_config = V1Config {
+        orientation_count: 8,
+        spatial_frequencies: vec![0.5, 1.0, 2.0, 4.0, 8.0],
+        cortical_magnification_factor: 2.5,
+        receptive_field_size: 7,
+        temporal_integration_window: 50.0,
+        adaptation_rate: 0.1,
+    };
+    let mut v1_processor = V1Processor::with_config(v1_config)?;
+    println!("✅ Initialized V1 processor with {} orientations", v1_config.orientation_count);
     
-    // Display orientation analysis
-    display_orientation_analysis(&cortical_output);
+    // Process through V1
+    let v1_output = v1_processor.process(&retinal_output)?;
+    println!("✅ V1 processing complete:");
+    println!("   - Simple cell responses: {:?}", v1_output.simple_cell_responses.dim());
+    println!("   - Complex cell responses: {:?}", v1_output.complex_cell_responses.dim());
+    println!("   - Orientation maps: {:?}", v1_output.orientation_maps.dim());
+    println!("   - Edge maps: {:?}", v1_output.edge_maps.dim());
+    println!("   - Motion vectors: {} detected", v1_output.motion_vectors.len());
     
-    // Display motion analysis
-    display_motion_analysis(&cortical_output);
+    // Initialize V2 processor
+    let v2_config = V2Config {
+        texture_analysis_enabled: true,
+        figure_ground_enabled: true,
+        contour_integration_enabled: true,
+        contextual_processing_enabled: true,
+        texture_window_size: 5,
+        figure_ground_threshold: 0.3,
+        contour_completion_strength: 0.7,
+    };
+    let mut v2_processor = V2Processor::with_config(v2_config)?;
+    println!("✅ Initialized V2 processor");
     
-    // Display adaptation analysis
-    display_adaptation_analysis(&cortical_output);
+    // Process through V2
+    let v2_output = v2_processor.process(&v1_output)?;
+    println!("✅ V2 processing complete:");
+    println!("   - Texture maps: {:?}", v2_output.texture_maps.dim());
+    println!("   - Figure-ground map: {:?}", v2_output.figure_ground_map.dim());
+    println!("   - Contour map: {:?}", v2_output.contour_map.dim());
+    println!("   - Object boundaries: {} detected", v2_output.object_boundaries.len());
+    println!("   - Texture features: {} extracted", v2_output.texture_features.len());
     
-    // Complete visual processing pipeline
-    let visual_output = visual_system.process_visual_input(&visual_input)?;
-    println!("\n🎯 Complete visual processing pipeline");
-    println!("   - Final compression ratio: {:.1}%", visual_output.compression_ratio * 100.0);
-    println!("   - Perceptual quality: {:.1}%", visual_output.perceptual_quality * 100.0);
+    // Initialize synaptic adaptation
+    let adaptation_config = AdaptationConfig {
+        hebbian_learning_rate: 0.01,
+        homeostatic_target: 0.5,
+        neuromodulation_strength: 0.1,
+        habituation_rate: 0.05,
+        adaptation_window: 100,
+        plasticity_threshold: 0.1,
+    };
+    let mut synaptic_adaptation = SynapticAdaptation::with_config(adaptation_config)?;
+    println!("✅ Initialized synaptic adaptation system");
     
-    println!("\n✨ Advanced cortical areas demo completed successfully!");
+    // Apply synaptic adaptation
+    let adaptation_output = synaptic_adaptation.adapt(&v1_output)?;
+    println!("✅ Synaptic adaptation complete:");
+    println!("   - Synaptic weights: {:?}", adaptation_output.synaptic_weights.dim());
+    println!("   - Hebbian activity: {:.3}", adaptation_output.adaptation_state.hebbian_activity);
+    println!("   - Homeostatic error: {:.3}", adaptation_output.adaptation_state.homeostatic_error);
+    println!("   - Neuromodulator level: {:.3}", adaptation_output.adaptation_state.neuromodulator_level);
+    println!("   - Habituation level: {:.3}", adaptation_output.adaptation_state.habituation_level);
+    println!("   - Learning rate: {:.3}", adaptation_output.learning_metrics.learning_rate);
+    println!("   - Convergence rate: {:.3}", adaptation_output.learning_metrics.convergence_rate);
+    println!("   - Stability measure: {:.3}", adaptation_output.learning_metrics.stability_measure);
+    println!("   - Efficiency gain: {:.3}", adaptation_output.learning_metrics.efficiency_gain);
+    
+    // Demonstrate complete compression engine
+    println!("\n🚀 Complete Compression Engine Demo");
+    println!("===================================");
+    
+    let mut compression_engine = CompressionEngine::new()?;
+    println!("✅ Initialized complete compression engine");
+    
+    // Calibrate photoreceptors
+    compression_engine.calibrate_photoreceptors(&visual_input)?;
+    println!("✅ Calibrated photoreceptors");
+    
+    // Compress visual input
+    let compressed_output = compression_engine.compress(&visual_input)?;
+    println!("✅ Compression complete:");
+    println!("   - Compression ratio: {:.1}%", compressed_output.compression_ratio * 100.0);
+    println!("   - VMAF quality: {:.1}%", compressed_output.quality_metrics.vmaf * 100.0);
+    println!("   - PSNR: {:.1} dB", compressed_output.quality_metrics.psnr);
+    println!("   - SSIM: {:.3}", compressed_output.quality_metrics.ssim);
+    println!("   - Biological accuracy: {:.1}%", compressed_output.biological_accuracy * 100.0);
+    
+    // Performance summary
+    println!("\n📊 Performance Summary");
+    println!("=====================");
+    println!("🎯 Target compression: 95%");
+    println!("🎯 Target quality (VMAF): 98%");
+    println!("🎯 Target biological accuracy: 94.7%");
+    println!();
+    println!("✅ Achieved compression: {:.1}%", compressed_output.compression_ratio * 100.0);
+    println!("✅ Achieved quality: {:.1}%", compressed_output.quality_metrics.vmaf * 100.0);
+    println!("✅ Achieved biological accuracy: {:.1}%", compressed_output.biological_accuracy * 100.0);
+    
+    // Check if targets are met
+    let compression_target_met = compressed_output.compression_ratio >= 0.95;
+    let quality_target_met = compressed_output.quality_metrics.vmaf >= 0.98;
+    let biological_target_met = compressed_output.biological_accuracy >= 0.947;
+    
+    println!();
+    if compression_target_met && quality_target_met && biological_target_met {
+        println!("🎉 ALL TARGETS ACHIEVED! 🎉");
+        println!("Afiyah successfully demonstrates revolutionary biomimetic compression!");
+    } else {
+        println!("⚠️  Some targets not yet achieved:");
+        if !compression_target_met {
+            println!("   - Compression ratio: {:.1}% (target: 95%)", compressed_output.compression_ratio * 100.0);
+        }
+        if !quality_target_met {
+            println!("   - Quality (VMAF): {:.1}% (target: 98%)", compressed_output.quality_metrics.vmaf * 100.0);
+        }
+        if !biological_target_met {
+            println!("   - Biological accuracy: {:.1}% (target: 94.7%)", compressed_output.biological_accuracy * 100.0);
+        }
+    }
+    
+    println!("\n🧬 Biological Processing Pipeline Complete");
+    println!("==========================================");
+    println!("This demonstration showcases the complete biomimetic visual processing");
+    println!("pipeline from retinal photoreceptors through cortical areas V1 and V2,");
+    println!("including synaptic adaptation mechanisms that enable learning and");
+    println!("optimization of the compression process.");
     
     Ok(())
 }
 
-/// Creates sample visual input for demonstration
-fn create_sample_visual_input() -> VisualInput {
-    // Create a 128x128 visual input with varying characteristics
+/// Creates synthetic visual input for demonstration
+fn create_synthetic_visual_input() -> Result<VisualInput, AfiyahError> {
+    // Create synthetic luminance and chrominance data
     let width = 128;
     let height = 128;
-    let total_pixels = (width * height) as usize;
+    let total_pixels = width * height;
     
     let mut luminance_data = Vec::with_capacity(total_pixels);
-    let mut chromatic_data = Vec::with_capacity(total_pixels * 2);
-    let mut temporal_data = Vec::with_capacity(10);
+    let mut chrominance_data = Vec::with_capacity(total_pixels);
     
-    // Generate luminance data with orientation patterns
+    // Generate synthetic visual patterns
     for y in 0..height {
         for x in 0..width {
-            let x_norm = x as f64 / width as f64;
-            let y_norm = y as f64 / height as f64;
+            // Create gradient pattern with some noise
+            let gradient = (x as f64 + y as f64) / (width as f64 + height as f64);
+            let noise = (x as f64 * 0.1 + y as f64 * 0.1).sin() * 0.1;
+            let luminance = (gradient + noise).max(0.0).min(1.0);
             
-            // Create diagonal orientation pattern
-            let orientation_value = (x_norm + y_norm).sin() * 0.5 + 0.5;
+            // Create chrominance pattern
+            let chrominance = ((x as f64 - width as f64 / 2.0).powi(2) + 
+                              (y as f64 - height as f64 / 2.0).powi(2)).sqrt() / 
+                             (width as f64 / 2.0).max(height as f64 / 2.0);
             
-            // Add some noise for realism
-            let noise = (rand::random::<f64>() - 0.5) * 0.1;
-            
-            luminance_data.push((orientation_value + noise).max(0.0).min(1.0));
+            luminance_data.push(luminance);
+            chrominance_data.push(chrominance.max(0.0).min(1.0));
         }
     }
     
-    // Generate chromatic data
-    for i in 0..total_pixels {
-        let red = (i as f64 / total_pixels as f64).sin() * 0.5 + 0.5;
-        let green = (i as f64 / total_pixels as f64).cos() * 0.5 + 0.5;
-        chromatic_data.push(red);
-        chromatic_data.push(green);
-    }
+    let metadata = InputMetadata {
+        viewing_distance: 2.0, // meters
+        ambient_lighting: 500.0, // lux
+        viewer_age: 30, // years
+        color_temperature: 6500.0, // Kelvin
+    };
     
-    // Generate temporal data (simulating motion)
-    for i in 0..10 {
-        let temporal_value = (i as f64 / 10.0).sin() * 0.5 + 0.5;
-        temporal_data.push(temporal_value);
-    }
-    
-    VisualInput {
+    Ok(VisualInput {
         luminance_data,
-        chromatic_data,
-        temporal_data,
+        chrominance_data,
         spatial_resolution: (width, height),
-        temporal_resolution: 60,
-    }
-}
-
-/// Displays orientation analysis results
-fn display_orientation_analysis(cortical_output: &afiyah::CorticalOutput) {
-    println!("\n📐 Orientation Analysis (V1)");
-    println!("   ┌─────────────────────────────────────────┐");
-    println!("   │ Orientation Maps Analysis               │");
-    println!("   ├─────────────────────────────────────────┤");
-    
-    for (i, map) in cortical_output.orientation_maps.iter().enumerate() {
-        let orientation_deg = (map.orientation * 180.0 / std::f64::consts::PI) as i32;
-        let strength_percent = (map.strength * 100.0) as i32;
-        
-        println!("   │ {:2}°: {:3}% strength", orientation_deg, strength_percent);
-    }
-    
-    println!("   └─────────────────────────────────────────┘");
-}
-
-/// Displays motion analysis results
-fn display_motion_analysis(cortical_output: &afiyah::CorticalOutput) {
-    println!("\n🎬 Motion Analysis (V5/MT)");
-    println!("   ┌─────────────────────────────────────────┐");
-    println!("   │ Motion Vectors Analysis                │");
-    println!("   ├─────────────────────────────────────────┤");
-    
-    for (i, vector) in cortical_output.motion_vectors.iter().enumerate() {
-        let direction_deg = (vector.direction * 180.0 / std::f64::consts::PI) as i32;
-        let magnitude_percent = (vector.magnitude * 100.0) as i32;
-        let confidence_percent = (vector.confidence * 100.0) as i32;
-        
-        println!("   │ {:3}°: {:3}% magnitude, {:3}% confidence", 
-                 direction_deg, magnitude_percent, confidence_percent);
-    }
-    
-    println!("   └─────────────────────────────────────────┘");
-}
-
-/// Displays adaptation analysis results
-fn display_adaptation_analysis(cortical_output: &afiyah::CorticalOutput) {
-    println!("\n🔄 Real-time Adaptation Analysis");
-    println!("   ┌─────────────────────────────────────────┐");
-    println!("   │ Adaptation Status                       │");
-    println!("   ├─────────────────────────────────────────┤");
-    println!("   │ Cortical compression: {:5.1}%", 
-             cortical_output.cortical_compression * 100.0);
-    println!("   │ Processing efficiency: {:5.1}%", 
-             (1.0 - cortical_output.cortical_compression) * 100.0);
-    println!("   └─────────────────────────────────────────┘");
-}
-
-// Simple random number generator for demo purposes
-mod rand {
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    use std::time::{SystemTime, UNIX_EPOCH};
-    
-    static mut SEED: u64 = 0;
-    
-    pub fn random<T>() -> T 
-    where
-        T: From<f64>,
-    {
-        unsafe {
-            SEED = SEED.wrapping_add(1);
-            let mut hasher = DefaultHasher::new();
-            SEED.hash(&mut hasher);
-            let hash = hasher.finish();
-            
-            // Use current time as additional entropy
-            let time = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_nanos() as u64;
-            
-            let combined = hash.wrapping_add(time);
-            let normalized = (combined as f64) / (u64::MAX as f64);
-            
-            T::from(normalized)
-        }
-    }
+        temporal_resolution: 60.0, // frames per second
+        metadata,
+    })
 }

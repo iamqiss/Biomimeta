@@ -29,3 +29,56 @@
 *  VIOLATION OF THESE TERMS MAY RESULT IN IMMEDIATE LICENSE TERMINATION AND LEGAL ACTION.
 */
 
+//! Homeostatic Plasticity Implementation
+
+use crate::AfiyahError;
+use ndarray::Array3;
+
+/// Homeostatic plasticity controller
+pub struct HomeostaticController {
+    target_activity: f64,
+    adaptation_rate: f64,
+    scaling_factor: f64,
+    activity_history: Vec<f64>,
+}
+
+impl HomeostaticController {
+    /// Creates a new homeostatic controller
+    pub fn new(target_activity: f64) -> Result<Self, AfiyahError> {
+        Ok(Self {
+            target_activity,
+            adaptation_rate: 0.01,
+            scaling_factor: 1.0,
+            activity_history: Vec::new(),
+        })
+    }
+
+    /// Adjusts weights to maintain target activity
+    pub fn adjust_weights(&mut self, weights: &Array3<f64>, activity_patterns: &Array3<f64>) -> Result<Array3<f64>, AfiyahError> {
+        let current_activity = activity_patterns.mean().unwrap_or(0.0);
+        self.activity_history.push(current_activity);
+        
+        if self.activity_history.len() > 100 {
+            self.activity_history.remove(0);
+        }
+        
+        // Calculate scaling factor to maintain target activity
+        let activity_error = self.target_activity - current_activity;
+        self.scaling_factor += self.adaptation_rate * activity_error;
+        self.scaling_factor = self.scaling_factor.max(0.1).min(2.0);
+        
+        // Apply scaling to weights
+        let adjusted_weights = weights * self.scaling_factor;
+        Ok(adjusted_weights)
+    }
+
+    /// Gets current error from target
+    pub fn get_error(&self) -> f64 {
+        if !self.activity_history.is_empty() {
+            let current_activity = self.activity_history.last().unwrap_or(&0.0);
+            (self.target_activity - current_activity).abs()
+        } else {
+            0.0
+        }
+    }
+}
