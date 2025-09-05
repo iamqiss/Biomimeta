@@ -38,13 +38,13 @@ impl PhotoreceptorLayer {
     /// Processes visual input through the photoreceptor layer
     pub fn process(&mut self, input: &crate::VisualInput) -> Result<PhotoreceptorResponse, AfiyahError> {
         // Calculate spatial sampling based on retinal distribution
-        let spatial_samples = self.spatial_distribution.sample_spatial_locations(input.spatial_resolution)?;
+        let spatial_samples = self.spatial_distribution.sample_spatial_locations((input.spatial_resolution.0 as u32, input.spatial_resolution.1 as u32))?;
         
         // Process through rod photoreceptors (low-light detection)
         let rod_signals = self.rods.process(&input.luminance_data, &spatial_samples)?;
         
         // Process through cone photoreceptors (color detection)
-        let cone_signals = self.cones.process(&input.chromatic_data, &spatial_samples)?;
+        let cone_signals = self.cones.process(&input.chrominance_data, &spatial_samples)?;
         
         // Apply opsin response modeling
         let opsin_response = self.opsin_response.process(&rod_signals, &cone_signals)?;

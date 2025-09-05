@@ -1,24 +1,119 @@
 [package]
 name = "afiyah"
-version = "0.1.0"
+version = "0.8.2"
 edition = "2021"
 license = "LicenseRef-BRPL-1.0"
-description = "Biomimetic Video Compression & Streaming Engine"
-repository = "https://example.com/biomimeta/afiyah"
+description = "Revolutionary Biomimetic Video Compression & Streaming Engine"
+repository = "https://github.com/biomimeta/afiyah"
+authors = ["Neo Qiss <research@biomimeta.com>"]
+keywords = ["video", "compression", "neuroscience", "biomimetic", "streaming"]
+categories = ["multimedia", "science", "algorithms"]
 
 [lib]
 name = "afiyah"
-path = "src/lib.rs"
+path = "lib.rs"
 
 [dependencies]
+# Core dependencies
 clap = { version = "4.5.4", features = ["derive"] }
 anyhow = "1.0"
+thiserror = "1.0"
+
+# Mathematical and scientific computing
+ndarray = { version = "0.15", features = ["serde"] }
+nalgebra = { version = "0.32", features = ["serde-serialize"] }
+num-traits = "0.2"
+num-complex = "0.4"
+statrs = "0.16"
+
+# Image processing and computer vision
+image = { version = "0.24", features = ["png", "jpeg", "bmp", "tiff"], optional = true }
+
+# Parallel processing and performance
+rayon = "1.8"
+crossbeam = "0.8"
+parking_lot = "0.12"
+
+# Serialization and data formats
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+
+# Logging and debugging
+log = "0.4"
+env_logger = "0.10"
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
+
+# Configuration and CLI
+config = "0.14"
+dirs = "5.0"
+
+# Testing and benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [dev-dependencies]
 assert_cmd = "2.0"
 predicates = "3.1"
+tempfile = "3.8"
+proptest = "1.4"
+
+# Feature flags for different build configurations
+[features]
+default = ["basic-biology"]
+basic-biology = []
+full-biology-sim = []
+gpu-acceleration = []
+streaming = []
+audio-integration = []
+bio-validation = []
+debug-neurons = ["tracing", "tracing-subscriber"]
+visualization = ["image"]
+clinical-data = []
+human-comparison = []
+reference-data-validation = []
 
 [[example]]
 name = "advanced_cortical_areas"
 path = "examples/advanced_cortical_areas.rs"
+
+[[example]]
+name = "basic_compression"
+path = "examples/basic_compression.rs"
+
+[[example]]
+name = "streaming_demo"
+path = "examples/streaming_demo.rs"
+required-features = ["streaming"]
+
+[[example]]
+name = "biological_validation"
+path = "examples/biological_validation.rs"
+required-features = ["bio-validation"]
+
+[[bench]]
+name = "retinal_processing"
+path = "benches/retinal_processing.rs"
+harness = false
+
+[[bench]]
+name = "cortical_processing"
+path = "benches/cortical_processing.rs"
+harness = false
+
+[[bench]]
+name = "compression_engine"
+path = "benches/compression_engine.rs"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.bench]
+opt-level = 3
+lto = true
+codegen-units = 1
 

@@ -65,9 +65,9 @@ impl ConePhotoreceptors {
     /// Processes chromatic data through cone photoreceptors
     pub fn process(&self, chromatic_data: &[f64], spatial_samples: &[SpatialSample]) -> Result<Vec<f64>, AfiyahError> {
         if chromatic_data.len() != spatial_samples.len() * 2 {
-            return Err(AfiyahError::InputError(
-                "Chromatic data length must be 2x spatial samples length".to_string()
-            ));
+            return Err(AfiyahError::InputError {
+                message: "Chromatic data length must be 2x spatial samples length".to_string()
+            });
         }
 
         let mut cone_signals = Vec::with_capacity(spatial_samples.len());

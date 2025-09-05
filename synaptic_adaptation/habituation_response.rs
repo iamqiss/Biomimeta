@@ -29,3 +29,67 @@
 *  VIOLATION OF THESE TERMS MAY RESULT IN IMMEDIATE LICENSE TERMINATION AND LEGAL ACTION.
 */
 
+//! Habituation Response Implementation
+
+use crate::AfiyahError;
+use ndarray::Array3;
+
+/// Habituation response controller
+pub struct HabituationController {
+    habituation_rate: f64,
+    recovery_rate: f64,
+    habituation_threshold: f64,
+    response_history: Vec<f64>,
+}
+
+impl HabituationController {
+    /// Creates a new habituation controller
+    pub fn new(habituation_rate: f64) -> Result<Self, AfiyahError> {
+        Ok(Self {
+            habituation_rate,
+            recovery_rate: 0.01,
+            habituation_threshold: 0.1,
+            response_history: Vec::new(),
+        })
+    }
+
+    /// Applies habituation to weights
+    pub fn apply_habituation(&mut self, weights: &Array3<f64>, activity_patterns: &Array3<f64>) -> Result<Array3<f64>, AfiyahError> {
+        let current_activity = activity_patterns.mean().unwrap_or(0.0);
+        self.response_history.push(current_activity);
+        
+        if self.response_history.len() > 50 {
+            self.response_history.remove(0);
+        }
+        
+        // Calculate habituation level
+        let habituation_level = self.calculate_habituation_level();
+        
+        // Apply habituation to weights
+        let habituation_factor = 1.0 - habituation_level;
+        let habituated_weights = weights * habituation_factor;
+        
+        Ok(habituated_weights)
+    }
+
+    /// Calculates habituation level
+    fn calculate_habituation_level(&self) -> f64 {
+        if self.response_history.len() < 10 {
+            return 0.0;
+        }
+        
+        let recent_responses = &self.response_history[self.response_history.len()-10..];
+        let older_responses = &self.response_history[..10];
+        
+        let recent_avg = recent_responses.iter().sum::<f64>() / recent_responses.len() as f64;
+        let older_avg = older_responses.iter().sum::<f64>() / older_responses.len() as f64;
+        
+        let habituation = (older_avg - recent_avg).max(0.0);
+        habituation.min(1.0)
+    }
+
+    /// Gets habituation level
+    pub fn get_habituation_level(&self) -> f64 {
+        self.calculate_habituation_level()
+    }
+}

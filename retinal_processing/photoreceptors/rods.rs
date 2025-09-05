@@ -61,9 +61,9 @@ impl RodPhotoreceptors {
     /// Processes luminance data through rod photoreceptors
     pub fn process(&self, luminance_data: &[f64], spatial_samples: &[SpatialSample]) -> Result<Vec<f64>, AfiyahError> {
         if luminance_data.len() != spatial_samples.len() {
-            return Err(AfiyahError::InputError(
-                "Luminance data length must match spatial samples length".to_string()
-            ));
+            return Err(AfiyahError::InputError {
+                message: "Luminance data length must match spatial samples length".to_string()
+            });
         }
 
         let mut rod_signals = Vec::with_capacity(luminance_data.len());
