@@ -36,6 +36,8 @@
 
 pub mod V1;
 pub mod V2;
+pub mod V3_V5;
+pub mod attention_mechanisms;
 
 use crate::AfiyahError;
 use ndarray::Array3;

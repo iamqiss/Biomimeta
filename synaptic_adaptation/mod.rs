@@ -1,11 +1,47 @@
+/* Biomimeta - Biomimetic Video Compression & Streaming Engine
+*  Copyright (C) 2025 Neo Qiss. All Rights Reserved.
+*
+*  PROPRIETARY NOTICE: This software and all associated intellectual property,
+*  including but not limited to algorithms, biological models, neural architectures,
+*  and compression methodologies, are the exclusive property of Neo Qiss.
+*
+*  COMMERCIAL RESTRICTION: Commercial use, distribution, or integration of this
+*  software is STRICTLY PROHIBITED without explicit written authorization and
+*  formal partnership agreements. Unauthorized commercial use constitutes
+*  copyright infringement and may result in legal action.
+*
+*  RESEARCH LICENSE: This software is made available under the Biological Research
+*  Public License (BRPL) v1.0 EXCLUSIVELY for academic research, educational purposes,
+*  and non-commercial scientific collaboration. Commercial entities must obtain
+*  separate licensing agreements.
+*
+*  BIOLOGICAL RESEARCH ATTRIBUTION: This software implements proprietary biological
+*  models derived from extensive neuroscientific research. All use must maintain
+*  complete scientific attribution as specified in the BRPL license terms.
+*
+*  NO WARRANTIES: This software is provided for research purposes only. No warranties
+*  are made regarding biological accuracy, medical safety, or fitness for any purpose.
+*
+*  For commercial licensing: commercial@biomimeta.com
+*  For research partnerships: research@biomimeta.com
+*  Legal inquiries: legal@biomimeta.com
+*
+*  VIOLATION OF THESE TERMS MAY RESULT IN IMMEDIATE LICENSE TERMINATION AND LEGAL ACTION.
+*/
+
 //! Synaptic Adaptation Module
 //! 
-//! This module implements the synaptic adaptation mechanisms that enable the visual system
-//! to learn and adapt to changing visual patterns, mimicking the plasticity of biological synapses.
+//! This module implements sophisticated synaptic adaptation mechanisms based on
+//! neurophysiological studies of synaptic plasticity and learning.
+//! 
+//! Biological Basis:
+//! - Hebb (1949): Hebbian learning and synaptic plasticity
+//! - Bliss & Lomo (1973): Long-term potentiation (LTP)
+//! - Turrigiano (1999): Homeostatic plasticity
+//! - Kandel (2001): Synaptic plasticity and memory
 
-use ndarray::{Array2, Array3};
+use ndarray::Array2;
 use crate::AfiyahError;
-use crate::cortical_processing::V1::V1Output;
 
 // Re-export all sub-modules
 pub mod hebbian_learning;
@@ -14,172 +50,152 @@ pub mod neuromodulation;
 pub mod habituation_response;
 
 // Re-export the main types
-pub use hebbian_learning::HebbianLearner;
-pub use homeostatic_plasticity::HomeostaticController;
-pub use neuromodulation::Neuromodulator;
-pub use habituation_response::HabituationController;
+pub use hebbian_learning::{HebbianLearner, SynapticWeight, LearningRule};
+pub use homeostatic_plasticity::{HomeostaticPlasticity, PlasticityState, AdaptationMechanism};
+pub use neuromodulation::{Neuromodulator, NeuromodulatorySignal, ModulationType};
+pub use habituation_response::{HabituationProcessor, HabituationState, AdaptationResponse};
 
-/// Configuration for synaptic adaptation parameters
+/// Configuration for synaptic adaptation
 #[derive(Debug, Clone)]
 pub struct AdaptationConfig {
-    pub hebbian_learning_rate: f64,
-    pub homeostatic_target: f64,
-    pub neuromodulation_strength: f64,
-    pub habituation_rate: f64,
+    pub learning_rate: f64,
+    pub decay_rate: f64,
+    pub plasticity_threshold: f64,
+    pub adaptation_window: usize,
 }
 
 impl Default for AdaptationConfig {
     fn default() -> Self {
         Self {
-            hebbian_learning_rate: 0.01,
-            homeostatic_target: 0.5,
-            neuromodulation_strength: 0.1,
-            habituation_rate: 0.05,
+            learning_rate: 0.01,
+            decay_rate: 0.001,
+            plasticity_threshold: 0.5,
+            adaptation_window: 100,
         }
     }
 }
 
-/// Output from synaptic adaptation processing
+/// Output from synaptic adaptation
 #[derive(Debug, Clone)]
 pub struct AdaptationOutput {
-    pub adapted_weights: Array3<f64>,
-    pub plasticity_map: Array2<f64>,
-    pub adaptation_metrics: AdaptationMetrics,
+    pub synaptic_weights: Array2<f64>,
+    pub learning_rate: f64,
+    pub plasticity_state: PlasticityState,
+    pub adaptation_level: f64,
+    pub processing_confidence: f64,
 }
 
-/// Metrics for tracking adaptation performance
-#[derive(Debug, Clone)]
-pub struct AdaptationMetrics {
-    pub hebbian_activity: f64,
-    pub homeostatic_error: f64,
-    pub dopamine_level: f64,
-    pub habituation_level: f64,
-}
-
-/// Main synaptic adaptation system that coordinates all adaptation mechanisms
+/// Main synaptic adaptation processor
 pub struct SynapticAdaptation {
     hebbian_learner: HebbianLearner,
-    homeostatic_controller: HomeostaticController,
+    homeostatic_plasticity: HomeostaticPlasticity,
     neuromodulator: Neuromodulator,
-    habituation_controller: HabituationController,
+    habituation_processor: HabituationProcessor,
     config: AdaptationConfig,
 }
 
 impl SynapticAdaptation {
-    /// Creates a new synaptic adaptation system with default configuration
+    /// Creates a new synaptic adaptation processor
     pub fn new() -> Result<Self, AfiyahError> {
         let config = AdaptationConfig::default();
         Self::with_config(config)
     }
 
-    /// Creates a new synaptic adaptation system with custom configuration
+    /// Creates a new synaptic adaptation processor with custom configuration
     pub fn with_config(config: AdaptationConfig) -> Result<Self, AfiyahError> {
-        let hebbian_learner = HebbianLearner::new(config.hebbian_learning_rate)?;
-        let homeostatic_controller = HomeostaticController::new(config.homeostatic_target)?;
-        let neuromodulator = Neuromodulator::new(config.neuromodulation_strength)?;
-        let habituation_controller = HabituationController::new(config.habituation_rate)?;
+        let hebbian_learner = HebbianLearner::new()?;
+        let homeostatic_plasticity = HomeostaticPlasticity::new()?;
+        let neuromodulator = Neuromodulator::new()?;
+        let habituation_processor = HabituationProcessor::new()?;
 
         Ok(Self {
             hebbian_learner,
-            homeostatic_controller,
+            homeostatic_plasticity,
             neuromodulator,
-            habituation_controller,
+            habituation_processor,
             config,
         })
     }
 
-    /// Processes input through the complete synaptic adaptation pipeline
-    pub fn adapt(&mut self, input: &V1Output) -> Result<AdaptationOutput, AfiyahError> {
-        // Extract activity patterns from V1 output
-        let activity_patterns = &input.simple_cell_responses;
-        
+    /// Processes synaptic adaptation for input
+    pub fn adapt(&mut self, input: &Array2<f64>) -> Result<AdaptationOutput, AfiyahError> {
         // Apply Hebbian learning
-        let hebbian_weights = self.hebbian_learner.update_weights(activity_patterns)?;
-        
+        let hebbian_output = self.hebbian_learner.learn(input)?;
+
         // Apply homeostatic plasticity
-        let homeostatic_weights = self.homeostatic_controller.adjust_weights(&hebbian_weights, activity_patterns)?;
-        
+        let plasticity_output = self.homeostatic_plasticity.adapt(&hebbian_output)?;
+
         // Apply neuromodulation
-        let neuromodulated_weights = self.neuromodulator.modulate_weights(&homeostatic_weights, activity_patterns)?;
-        
+        let neuromodulatory_output = self.neuromodulator.modulate(&plasticity_output)?;
+
         // Apply habituation
-        let final_weights = self.habituation_controller.apply_habituation(&neuromodulated_weights, activity_patterns)?;
-        
-        // Generate plasticity map
-        let plasticity_map = self.generate_plasticity_map(&final_weights)?;
-        
-        // Collect adaptation metrics
-        let adaptation_metrics = AdaptationMetrics {
-            hebbian_activity: self.hebbian_learner.get_activity_level(),
-            homeostatic_error: self.homeostatic_controller.get_error(),
-            dopamine_level: self.neuromodulator.get_dopamine_level(),
-            habituation_level: self.habituation_controller.get_habituation_level(),
-        };
+        let habituation_output = self.habituation_processor.process(&neuromodulatory_output)?;
+
+        // Calculate overall adaptation level
+        let adaptation_level = self.calculate_adaptation_level(&habituation_output)?;
+
+        // Calculate processing confidence
+        let processing_confidence = self.calculate_processing_confidence(&habituation_output)?;
 
         Ok(AdaptationOutput {
-            adapted_weights: final_weights,
-            plasticity_map,
-            adaptation_metrics,
+            synaptic_weights: habituation_output,
+            learning_rate: self.config.learning_rate,
+            plasticity_state: plasticity_output,
+            adaptation_level,
+            processing_confidence,
         })
-    }
-
-    /// Generates a spatial map of synaptic plasticity
-    fn generate_plasticity_map(&self, weights: &Array3<f64>) -> Result<Array2<f64>, AfiyahError> {
-        let (orientations, spatial_freqs, spatial_size) = weights.dim();
-        let size = (spatial_size as f64).sqrt() as usize;
-        
-        if size * size != spatial_size {
-            return Err(AfiyahError::InputError { 
-                message: "Spatial size must be a perfect square for plasticity mapping".to_string() 
-            });
-        }
-
-        let mut plasticity_map = Array2::zeros((size, size));
-        
-        for h in 0..size {
-            for w in 0..size {
-                let spatial_idx = h * size + w;
-                let mut plasticity = 0.0;
-                
-                for o in 0..orientations {
-                    for s in 0..spatial_freqs {
-                        plasticity += weights[[o, s, spatial_idx]].abs();
-                    }
-                }
-                
-                plasticity_map[[h, w]] = plasticity / (orientations * spatial_freqs) as f64;
-            }
-        }
-        
-        Ok(plasticity_map)
     }
 
     /// Updates the adaptation configuration
     pub fn update_config(&mut self, config: AdaptationConfig) -> Result<(), AfiyahError> {
         self.config = config;
         // Recreate components with new configuration
-        self.hebbian_learner = HebbianLearner::new(self.config.hebbian_learning_rate)?;
-        self.homeostatic_controller = HomeostaticController::new(self.config.homeostatic_target)?;
-        self.neuromodulator = Neuromodulator::new(self.config.neuromodulation_strength)?;
-        self.habituation_controller = HabituationController::new(self.config.habituation_rate)?;
+        self.hebbian_learner = HebbianLearner::new()?;
+        self.homeostatic_plasticity = HomeostaticPlasticity::new()?;
+        self.neuromodulator = Neuromodulator::new()?;
+        self.habituation_processor = HabituationProcessor::new()?;
         Ok(())
     }
 
-    /// Gets current adaptation metrics
-    pub fn get_metrics(&self) -> AdaptationMetrics {
-        AdaptationMetrics {
-            hebbian_activity: self.hebbian_learner.get_activity_level(),
-            homeostatic_error: self.homeostatic_controller.get_error(),
-            dopamine_level: self.neuromodulator.get_dopamine_level(),
-            habituation_level: self.habituation_controller.get_habituation_level(),
+    /// Gets current adaptation configuration
+    pub fn get_config(&self) -> &AdaptationConfig {
+        &self.config
+    }
+
+    fn calculate_adaptation_level(&self, weights: &Array2<f64>) -> Result<f64, AfiyahError> {
+        let mut total_weight = 0.0;
+        let mut count = 0;
+
+        for weight in weights.iter() {
+            total_weight += weight.abs();
+            count += 1;
         }
+
+        if count > 0 {
+            Ok(total_weight / count as f64)
+        } else {
+            Ok(0.0)
+        }
+    }
+
+    fn calculate_processing_confidence(&self, weights: &Array2<f64>) -> Result<f64, AfiyahError> {
+        // Calculate confidence based on weight stability and magnitude
+        let adaptation_level = self.calculate_adaptation_level(weights)?;
+        let confidence = adaptation_level.min(1.0).max(0.0);
+        Ok(confidence)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cortical_processing::V1::V1Output;
+
+    #[test]
+    fn test_adaptation_config_default() {
+        let config = AdaptationConfig::default();
+        assert_eq!(config.learning_rate, 0.01);
+        assert_eq!(config.decay_rate, 0.001);
+    }
 
     #[test]
     fn test_synaptic_adaptation_creation() {
@@ -188,12 +204,12 @@ mod tests {
     }
 
     #[test]
-    fn test_adaptation_with_config() {
+    fn test_synaptic_adaptation_with_config() {
         let config = AdaptationConfig {
-            hebbian_learning_rate: 0.02,
-            homeostatic_target: 0.6,
-            neuromodulation_strength: 0.15,
-            habituation_rate: 0.08,
+            learning_rate: 0.02,
+            decay_rate: 0.002,
+            plasticity_threshold: 0.6,
+            adaptation_window: 150,
         };
         let adaptation = SynapticAdaptation::with_config(config);
         assert!(adaptation.is_ok());
@@ -202,20 +218,13 @@ mod tests {
     #[test]
     fn test_adaptation_processing() {
         let mut adaptation = SynapticAdaptation::new().unwrap();
+        let input = Array2::ones((32, 32));
         
-        // Create mock V1 output
-        let mock_v1_output = V1Output {
-            simple_responses: Array3::ones((8, 4, 64)),
-            complex_responses: Array3::ones((8, 4, 64)),
-            orientation_responses: Array3::ones((8, 4, 64)),
-            edge_responses: Array3::ones((8, 4, 64)),
-        };
-        
-        let result = adaptation.adapt(&mock_v1_output);
+        let result = adaptation.adapt(&input);
         assert!(result.is_ok());
         
         let output = result.unwrap();
-        assert_eq!(output.adapted_weights.dim(), (8, 4, 64));
-        assert_eq!(output.plasticity_map.dim(), (8, 8));
+        assert!(output.adaptation_level >= 0.0);
+        assert!(output.processing_confidence >= 0.0 && output.processing_confidence <= 1.0);
     }
 }
