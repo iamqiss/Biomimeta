@@ -263,7 +263,7 @@ impl VMAFCalculator {
         let ref_gradient = self.calculate_gradient_magnitude(reference)?;
         let dist_gradient = self.calculate_gradient_magnitude(distorted)?;
         
-        let gradient_loss = (ref_gradient - dist_gradient).mapv(|x| x.abs());
+        let gradient_loss = (ref_gradient.clone() - dist_gradient).mapv(|x| x.abs());
         let dlm_score = 1.0 - (gradient_loss.sum() / ref_gradient.sum());
         
         Ok(dlm_score.max(0.0))
@@ -288,7 +288,7 @@ impl VMAFCalculator {
         let ref_details = self.extract_additive_details(reference)?;
         let dist_details = self.extract_additive_details(distorted)?;
         
-        let detail_preservation = (ref_details * dist_details).sum() / ref_details.sum();
+        let detail_preservation = (ref_details.clone() * dist_details).sum() / ref_details.sum();
         Ok(detail_preservation.clamp(0.0, 1.0))
     }
 

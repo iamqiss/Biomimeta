@@ -102,12 +102,14 @@ pub mod quantization;
 // Enterprise architecture and advanced algorithms
 #[path = "src/enterprise_architecture/mod.rs"]
 pub mod enterprise_architecture;
+#[path = "src/advanced_compression_algorithms/mod.rs"]
 pub mod advanced_compression_algorithms;
+#[path = "src/biological_modeling_enhancements/mod.rs"]
 pub mod biological_modeling_enhancements;
 #[path = "src/afiyah_codec/mod.rs"]
 pub mod afiyah_codec;
+#[path = "src/testing_validation/mod.rs"]
 pub mod testing_validation;
-pub mod performance_optimization;
 pub mod bitstream_formatting;
 #[path = "src/arithmetic_coding/mod.rs"]
 pub mod arithmetic_coding;
@@ -129,11 +131,11 @@ pub use experimental_features::{ExperimentalProcessor, ExperimentalConfig};
 pub use hardware_acceleration::{HardwareAccelerator, AccelerationConfig, GPUAccelerator, SIMDOptimizer, NeuromorphicInterface};
 pub use real_time_adaptation::{RealTimeAdaptationProcessor, AdaptationOutput as RealTimeAdaptationOutput, AdaptationConfig, ContentAnalyzer, ViewerBehaviorTracker, AdaptationController, ParameterOptimizer, PerformanceMonitor};
 pub use medical_applications::{MedicalProcessor, MedicalConfig, RetinalDiseaseModel, ClinicalValidator};
-pub use performance_optimization::{PerformanceOptimizer, OptimizationConfig, BenchmarkSuite, Profiler, RealTimeProcessor};
+// pub use performance_optimization::{PerformanceOptimizer, OptimizationConfig, BenchmarkSuite, Profiler, RealTimeProcessor}; // Disabled for compatibility
 pub use ultra_high_resolution::{UltraHighResolutionProcessor, UltraConfig, SpatialSuperResolver, TemporalInterpolator, AudioVideoSynchronizer};
 
 // Core compression components
-pub use entropy_coding::{BiologicalEntropyCoder, EntropyCodingConfig, Symbol, TransformOutput as EntropyTransformOutput};
+pub use entropy_coding::{BiologicalEntropyCoder, EntropyCodingConfig, Symbol};
 pub use transform_coding::{BiologicalTransformCoder, TransformCodingConfig, TransformType, TransformOutput};
 pub use motion_estimation::{BiologicalMotionEstimator, MotionEstimationConfig, MotionVector, MotionEstimationResult};
 pub use quantization::{BiologicalQuantizer, QuantizationConfig, QuantizerType, QuantizationResult};
@@ -141,8 +143,8 @@ pub use bitstream_formatting::{BiologicalBitstreamFormatter, BitstreamConfig, Bi
 
 // Quality metrics system
 pub use quality_metrics::{
-    QualityMetricsEngine, QualityConfig, QualityMetrics, QualityBreakdown, BiologicalBreakdown,
-    TemporalMetrics, SpatialMetrics, QualityTrend, TrendDirection,
+    QualityConfig, QualityBreakdown, BiologicalBreakdown,
+    TemporalMetrics, SpatialMetrics,
     PSNRCalculator, SSIMCalculator, MSSSIMCalculator,
     BiologicalAccuracyAssessor, BiologicalAccuracyConfig, BiologicalAccuracyResult,
     SubjectiveTestingEngine, SubjectiveTestingConfig, TestType, Participant, TestSession, 

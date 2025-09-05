@@ -58,7 +58,7 @@ use std::sync::mpsc;
 use std::cmp::Ordering;
 
 use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock as AsyncRwLock;
+// use tokio::sync::RwLock as AsyncRwLock; // Disabled for compatibility
 
 use crate::AfiyahError;
 

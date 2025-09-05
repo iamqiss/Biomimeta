@@ -51,6 +51,7 @@ pub mod viewer_behavior_tracker;
 pub mod adaptation_controller;
 pub mod parameter_optimizer;
 pub mod performance_monitor;
+pub mod realtime_pipeline;
 
 // Re-export the main types
 pub use content_analyzer::{ContentAnalyzer, ContentFeatures, ContentComplexity};
@@ -58,6 +59,7 @@ pub use viewer_behavior_tracker::{ViewerBehaviorTracker, ViewerBehavior, Behavio
 pub use adaptation_controller::{AdaptationController, AdaptationStrategy, AdaptationState};
 pub use parameter_optimizer::{ParameterOptimizer, CompressionParameters, OptimizationTarget};
 pub use performance_monitor::{PerformanceMonitor, PerformanceMetrics, SystemHealth};
+pub use realtime_pipeline::{TiledProcessor, RealtimePipelineConfig, ProcessingStats, MemoryPool};
 
 /// Real-time adaptation configuration
 #[derive(Debug, Clone)]

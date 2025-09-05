@@ -288,7 +288,7 @@ impl BiologicalTransformCoder {
 
         // Step 5: Create transform output
         let output = TransformOutput {
-            coefficients: transform_coefficients,
+            coefficients: transform_coefficients.clone(),
             transform_type: selected_transform,
             content_analysis,
             frequency_analysis,

@@ -408,12 +408,12 @@ impl BiologicalMotionEstimator {
         let compressed_motion = if self.config.enable_motion_compression {
             self.motion_vector_compressor.compress_motion_vectors(&integrated_motion)?
         } else {
-            integrated_motion
+            integrated_motion.clone()
         };
 
         // Step 6: Create motion estimation result
         let result = MotionEstimationResult {
-            motion_vectors: compressed_motion,
+            motion_vectors: compressed_motion.clone(),
             saccadic_motions,
             optical_flow,
             temporal_predictions,
@@ -487,7 +487,7 @@ impl BiologicalMotionEstimator {
                 let saccadic_motion = self.get_saccadic_motion_for_block(block_y, block_x, saccadic_motions)?;
                 let optical_flow_motion = self.get_optical_flow_motion_for_block(block_y, block_x, optical_flow)?;
                 let temporal_motion = if block_index < temporal_predictions.len() {
-                    temporal_predictions[block_index]
+                    temporal_predictions[block_index].clone()
                 } else {
                     MotionVector { x: 0.0, y: 0.0, confidence: 0.0, biological_significance: 0.0 }
                 };

@@ -394,7 +394,7 @@ impl MemoryOptimizer {
             let pool = MemoryPool::new(
                 self.config.memory_pool_size,
                 self.config.cache_line_size,
-                self.config.memory_alignment,
+                self.config.memory_alignment.clone(),
             )?;
             pools.insert(pool_type.to_string(), pool);
         }
@@ -445,7 +445,7 @@ impl MemoryOptimizer {
     }
 
     fn select_allocation_strategy(&self, size: usize) -> Result<AllocationStrategy, AfiyahError> {
-        match self.config.allocation_strategy {
+        match &self.config.allocation_strategy {
             AllocationStrategy::Hybrid => {
                 // Select strategy based on size and usage patterns
                 if size < 1024 {
