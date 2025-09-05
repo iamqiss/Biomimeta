@@ -98,6 +98,14 @@ pub mod entropy_coding;
 pub mod transform_coding;
 pub mod motion_estimation;
 pub mod quantization;
+
+// Enterprise architecture and advanced algorithms
+pub mod enterprise_architecture;
+pub mod advanced_compression_algorithms;
+pub mod biological_modeling_enhancements;
+pub mod afiyah_codec;
+pub mod testing_validation;
+pub mod performance_optimization;
 pub mod bitstream_formatting;
 
 // External dependencies
