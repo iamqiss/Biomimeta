@@ -85,6 +85,9 @@ pub mod perceptual_optimization;
 pub mod streaming_engine;
 pub mod multi_modal_integration;
 pub mod experimental_features;
+pub mod hardware_acceleration;
+pub mod medical_applications;
+pub mod performance_optimization;
 pub mod utilities;
 pub mod configs;
 
@@ -93,7 +96,12 @@ pub use retinal_processing::{RetinalProcessor, RetinalOutput, RetinalCalibration
 pub use cortical_processing::{VisualCortex, CorticalOutput, CorticalCalibrationParams};
 pub use synaptic_adaptation::{SynapticAdaptation, AdaptationOutput};
 pub use perceptual_optimization::{PerceptualOptimizer, QualityMetrics, MaskingParams};
-pub use streaming_engine::{AdaptiveStreamer, BiologicalQoS, StreamingConfig};
+pub use streaming_engine::{StreamingEngine, AdaptiveStreamer, BiologicalQoS, StreamingConfig};
+pub use multi_modal_integration::{MultiModalProcessor, IntegrationParams};
+pub use experimental_features::{ExperimentalProcessor, ExperimentalConfig};
+pub use hardware_acceleration::{HardwareAccelerator, AccelerationConfig, GPUAccelerator, SIMDOptimizer, NeuromorphicInterface};
+pub use medical_applications::{MedicalProcessor, MedicalConfig, DiagnosticTool, RetinalDiseaseModel, ClinicalValidator};
+pub use performance_optimization::{PerformanceOptimizer, OptimizationConfig, BenchmarkSuite, Profiler, RealTimeProcessor};
 
 /// Main compression engine that orchestrates all biological components
 pub struct CompressionEngine {
@@ -102,6 +110,9 @@ pub struct CompressionEngine {
     synaptic_adaptation: SynapticAdaptation,
     perceptual_optimizer: PerceptualOptimizer,
     streaming_engine: AdaptiveStreamer,
+    hardware_accelerator: HardwareAccelerator,
+    medical_processor: MedicalProcessor,
+    performance_optimizer: PerformanceOptimizer,
     config: EngineConfig,
 }
 
@@ -185,6 +196,9 @@ impl CompressionEngine {
             synaptic_adaptation: SynapticAdaptation::new()?,
             perceptual_optimizer: PerceptualOptimizer::new()?,
             streaming_engine: AdaptiveStreamer::new()?,
+            hardware_accelerator: HardwareAccelerator::new()?,
+            medical_processor: MedicalProcessor::new()?,
+            performance_optimizer: PerformanceOptimizer::new()?,
             config: EngineConfig::default(),
         })
     }
@@ -197,6 +211,9 @@ impl CompressionEngine {
             synaptic_adaptation: SynapticAdaptation::new()?,
             perceptual_optimizer: PerceptualOptimizer::new()?,
             streaming_engine: AdaptiveStreamer::new()?,
+            hardware_accelerator: HardwareAccelerator::new()?,
+            medical_processor: MedicalProcessor::new()?,
+            performance_optimizer: PerformanceOptimizer::new()?,
             config,
         })
     }
@@ -240,6 +257,67 @@ impl CompressionEngine {
         self
     }
 
+    /// Enables GPU acceleration
+    pub fn enable_gpu_acceleration(&mut self) -> Result<(), AfiyahError> {
+        self.hardware_accelerator.enable_gpu()
+    }
+
+    /// Enables SIMD optimization
+    pub fn enable_simd_optimization(&mut self, architecture: crate::hardware_acceleration::SIMDArchitecture) -> Result<(), AfiyahError> {
+        self.hardware_accelerator.enable_simd(architecture)
+    }
+
+    /// Enables neuromorphic processing
+    pub fn enable_neuromorphic_processing(&mut self, hardware: crate::hardware_acceleration::NeuromorphicHardware) -> Result<(), AfiyahError> {
+        self.hardware_accelerator.enable_neuromorphic(hardware)
+    }
+
+    /// Enables medical diagnostic mode
+    pub fn enable_medical_diagnostics(&mut self) -> Result<(), AfiyahError> {
+        // Medical diagnostics are enabled by default in the medical processor
+        Ok(())
+    }
+
+    /// Processes medical imaging for diagnostic purposes
+    pub fn process_medical_diagnostics(&mut self, input: &Array2<f64>) -> Result<crate::medical_applications::DiagnosticResult, AfiyahError> {
+        self.medical_processor.process_diagnostic(input)
+    }
+
+    /// Models disease progression
+    pub fn model_disease_progression(&mut self, input: &Array2<f64>, time_steps: usize) -> Result<crate::medical_applications::DiseaseProgression, AfiyahError> {
+        self.medical_processor.model_disease_progression(input, time_steps)
+    }
+
+    /// Validates clinical accuracy
+    pub fn validate_clinical_accuracy(&mut self, input: &Array2<f64>, ground_truth: &Array2<f64>) -> Result<crate::medical_applications::ValidationResult, AfiyahError> {
+        self.medical_processor.validate_clinical_accuracy(input, ground_truth)
+    }
+
+    /// Optimizes performance
+    pub fn optimize_performance(&mut self, input: &Array2<f64>) -> Result<Array2<f64>, AfiyahError> {
+        self.performance_optimizer.optimize_processing(input)
+    }
+
+    /// Runs performance benchmarks
+    pub fn run_benchmarks(&mut self, input: &Array2<f64>) -> Result<crate::performance_optimization::BenchmarkResult, AfiyahError> {
+        self.performance_optimizer.run_benchmarks(input)
+    }
+
+    /// Profiles performance
+    pub fn profile_performance(&mut self, input: &Array2<f64>) -> Result<crate::performance_optimization::ProfileResult, AfiyahError> {
+        self.performance_optimizer.profile_performance(input)
+    }
+
+    /// Optimizes for real-time processing
+    pub fn optimize_for_real_time(&mut self, input: &Array2<f64>) -> Result<Array2<f64>, AfiyahError> {
+        self.performance_optimizer.optimize_for_real_time(input)
+    }
+
+    /// Monitors performance metrics
+    pub fn monitor_performance(&mut self) -> Result<crate::performance_optimization::PerformanceMetrics, AfiyahError> {
+        self.performance_optimizer.monitor_performance()
+    }
+
     /// Compresses visual input using biological processing pipeline
     pub fn compress(&mut self, input: &VisualInput) -> Result<CompressedOutput, AfiyahError> {
         // Stage 1: Retinal processing
@@ -257,12 +335,18 @@ impl CompressionEngine {
         // Stage 4: Perceptual optimization
         let optimized_output = self.perceptual_optimizer.optimize(&cortical_output)?;
         
+        // Stage 5: Hardware acceleration
+        let accelerated_output = self.hardware_accelerator.accelerate_processing(&optimized_output.data)?;
+        
+        // Stage 6: Performance optimization
+        let final_output = self.performance_optimizer.optimize_processing(&accelerated_output)?;
+        
         // Calculate final metrics
         let compression_ratio = self.calculate_compression_ratio(&optimized_output);
         let quality_metrics = self.calculate_quality_metrics(input, &optimized_output)?;
         
         Ok(CompressedOutput {
-            data: optimized_output.clone(),
+            data: final_output,
             compression_ratio,
             quality_metrics,
             biological_accuracy: self.calculate_biological_accuracy(&optimized_output)?,
