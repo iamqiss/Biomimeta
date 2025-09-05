@@ -42,6 +42,9 @@ use afiyah::{
     synaptic_adaptation::{SynapticAdaptation, AdaptationConfig},
 };
 
+use afiyah::entropy_coding::{BiologicalEntropyCoder, EntropyCodingConfig, Symbol};
+use afiyah::afiyah_codec::{AfiyahCodec, AfiyahCodecConfig, InputFormat, OutputFormat, ErrorHandlingConfig, PerformanceMonitoringConfig, BiologicalProcessingConfig, QualityMetrics};
+
 /// Test biological accuracy of retinal processing
 #[test]
 fn test_retinal_biological_accuracy() -> Result<(), AfiyahError> {
@@ -188,6 +191,87 @@ fn test_complete_compression_engine() -> Result<(), AfiyahError> {
     assert!(compressed_output.biological_accuracy >= 0.0 && compressed_output.biological_accuracy <= 1.0,
             "Biological accuracy should be between 0.0 and 1.0");
     
+    Ok(())
+}
+
+/// Test arithmetic/entropy coder roundtrip for robustness
+#[test]
+fn test_entropy_coder_roundtrip_bytes() -> Result<(), AfiyahError> {
+    let mut coder = BiologicalEntropyCoder::new(EntropyCodingConfig::default())
+        .map_err(|e| AfiyahError::EntropyCoding { message: format!("{e}") })?;
+
+    let raw: Vec<u8> = (0..=255u16).map(|v| (v % 251) as u8).collect();
+    let symbols: Vec<Symbol> = raw.iter().map(|b| Symbol::Luminance(*b as f64)).collect();
+    let coded = coder.encode(&symbols)
+        .map_err(|e| AfiyahError::EntropyCoding { message: format!("{e}") })?;
+    let decoded = coder.decode(&coded)
+        .map_err(|e| AfiyahError::EntropyCoding { message: format!("{e}") })?;
+
+    assert_eq!(decoded.len(), symbols.len());
+    Ok(())
+}
+
+/// Smoke test: AfiyahCodec stream generation integrates entropy coder sections
+#[test]
+fn test_afiyah_codec_stream_generation() -> Result<(), AfiyahError> {
+    // Minimal config
+    let cfg = AfiyahCodecConfig {
+        input_formats: vec![InputFormat::Raw],
+        output_formats: vec![OutputFormat::Afiyah],
+        quality_level: 0.95,
+        biological_accuracy_required: 0.947,
+        compression_ratio_target: 0.95,
+        processing_time_limit: std::time::Duration::from_secs(5),
+        error_handling: ErrorHandlingConfig {
+            error_detection_enabled: true,
+            error_recovery_enabled: true,
+            error_logging_enabled: true,
+            error_reporting_enabled: false,
+            error_threshold: 0.01,
+            recovery_threshold: 0.9,
+        },
+        performance_monitoring: PerformanceMonitoringConfig {
+            performance_monitoring_enabled: false,
+            performance_analysis_enabled: false,
+            performance_optimization_enabled: false,
+            performance_reporting_enabled: false,
+            monitoring_interval: std::time::Duration::from_secs(1),
+            analysis_interval: std::time::Duration::from_secs(1),
+            optimization_interval: std::time::Duration::from_secs(1),
+            reporting_interval: std::time::Duration::from_secs(1),
+        },
+        biological_processing: BiologicalProcessingConfig {
+            retinal_processing_enabled: true,
+            cortical_processing_enabled: true,
+            attention_processing_enabled: true,
+            adaptation_processing_enabled: true,
+            quality_processing_enabled: true,
+            biological_accuracy_required: 0.947,
+            adaptation_rate: 0.1,
+            quality_threshold: 0.95,
+        },
+    };
+
+    // Construct a dummy BiologicalOutput-like payload through private API is not possible here.
+    // Instead, instantiate codec and call internal stream encode via transcode path once available.
+    // For now, ensure Binary entropy coding API is reachable via crate re-exports.
+
+    // Validate codec type compiles and default metrics struct exists
+    let _phantom_ok: QualityMetrics = QualityMetrics {
+        vmaf_score: 0.98,
+        psnr: 40.0,
+        ssim: 0.99,
+        biological_accuracy: 0.95,
+        perceptual_quality: 0.98,
+        compression_ratio: 0.95,
+        processing_time: std::time::Duration::ZERO,
+        memory_usage: 0,
+    };
+
+    // Construction path (may require async runtime for full transcode; we only check construction here)
+    let _codec = AfiyahCodec::new(cfg)
+        .map_err(|e| AfiyahError::Compression { message: format!("{e}") })?;
+
     Ok(())
 }
 

@@ -100,13 +100,17 @@ pub mod motion_estimation;
 pub mod quantization;
 
 // Enterprise architecture and advanced algorithms
+#[path = "src/enterprise_architecture/mod.rs"]
 pub mod enterprise_architecture;
 pub mod advanced_compression_algorithms;
 pub mod biological_modeling_enhancements;
+#[path = "src/afiyah_codec/mod.rs"]
 pub mod afiyah_codec;
 pub mod testing_validation;
 pub mod performance_optimization;
 pub mod bitstream_formatting;
+#[path = "src/arithmetic_coding/mod.rs"]
+pub mod arithmetic_coding;
 
 // Quality metrics system
 pub mod quality_metrics;
