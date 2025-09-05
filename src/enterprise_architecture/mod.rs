@@ -53,6 +53,7 @@ use tokio::sync::{RwLock, Mutex};
 use serde::{Deserialize, Serialize};
 use anyhow::{Result, anyhow};
 use uuid::Uuid;
+use crate::entropy_coding::{BiologicalEntropyCoder, EntropyCodingConfig, Symbol};
 
 /// Enterprise compression service orchestrator
 pub struct EnterpriseCompressionOrchestrator {
@@ -417,8 +418,12 @@ impl EnterpriseCompressionOrchestrator {
                 Ok(input_data)
             }
             ServiceRole::EntropyCoding => {
-                // Simulate entropy coding
+                // Simulate entropy coding and validate coder health via a tiny probe
                 tokio::time::sleep(Duration::from_millis(5)).await;
+                let mut coder = BiologicalEntropyCoder::new(EntropyCodingConfig::default())
+                    .map_err(|e| anyhow!("entropy coder init failed: {e}"))?;
+                let probe: Vec<Symbol> = vec![Symbol::Luminance(0.0), Symbol::Luminance(1.0)];
+                let _ = coder.encode(&probe).map_err(|e| anyhow!("entropy probe encode failed: {e}"))?;
                 Ok(input_data)
             }
             ServiceRole::TransformCoding => {

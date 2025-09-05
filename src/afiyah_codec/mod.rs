@@ -53,6 +53,7 @@ use tokio::sync::{RwLock, Mutex};
 use serde::{Deserialize, Serialize};
 use anyhow::{Result, anyhow};
 use uuid::Uuid;
+use crate::entropy_coding::{BiologicalEntropyCoder, EntropyCodingConfig, Symbol};
 
 /// Enterprise Afiyah codec engine
 pub struct AfiyahCodec {
@@ -990,26 +991,50 @@ impl AfiyahCodec {
 
     /// Encodes Afiyah stream
     fn encode_afiyah_stream(&self, output: &BiologicalOutput, quality: &QualityMetrics) -> Result<Vec<u8>> {
-        // Encode biological data into Afiyah format
+        // Enterprise-grade Afiyah stream container with entropy-coded sections
+        // Layout:
+        // [Magic "AFIYAH"][ver u8][metrics 5x f64][sections u8][repeated: id u8 | len u32 | payload]
+
         let mut stream_data = Vec::new();
-        
-        // Add header
         stream_data.extend_from_slice(b"AFIYAH");
-        
-        // Add quality metrics
+        stream_data.push(1u8); // version
+
+        // Quality metrics
         stream_data.extend_from_slice(&quality.vmaf_score.to_le_bytes());
         stream_data.extend_from_slice(&quality.psnr.to_le_bytes());
         stream_data.extend_from_slice(&quality.ssim.to_le_bytes());
         stream_data.extend_from_slice(&quality.biological_accuracy.to_le_bytes());
-        
-        // Add biological data
-        stream_data.extend_from_slice(&output.retinal_data);
-        stream_data.extend_from_slice(&output.cortical_data);
-        stream_data.extend_from_slice(&output.attention_data);
-        stream_data.extend_from_slice(&output.adaptation_data);
-        
+        stream_data.extend_from_slice(&quality.compression_ratio.to_le_bytes());
+
+        // Prepare sections and entropy-code them individually
+        let sections: Vec<(u8, &[u8])> = vec![
+            (0x01, &output.retinal_data),
+            (0x02, &output.cortical_data),
+            (0x03, &output.attention_data),
+            (0x04, &output.adaptation_data),
+            (0x05, &output.quality_data),
+        ];
+
+        stream_data.push(sections.len() as u8);
+
+        // Entropy coder configured for robust streaming
+        let mut coder = BiologicalEntropyCoder::new(EntropyCodingConfig::default())?;
+
+        for (id, raw) in sections {
+            // Map raw bytes to Symbols for entropy coding
+            let symbols: Vec<Symbol> = raw.iter().map(|b| Symbol::Luminance(*b as f64)).collect();
+            let coded = coder.encode(&symbols)?;
+
+            // Write section header and payload
+            stream_data.push(id);
+            let len = coded.len() as u32;
+            stream_data.extend_from_slice(&len.to_le_bytes());
+            stream_data.extend_from_slice(&coded);
+        }
+
         Ok(stream_data)
     }
+
 
     /// Calculates biological accuracy
     fn calculate_biological_accuracy(&self, output: &QualityOutput) -> f64 {
