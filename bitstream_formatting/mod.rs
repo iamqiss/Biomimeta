@@ -570,7 +570,7 @@ impl BiologicalBitstreamFormatter {
 
         // Step 6: Create bitstream output
         let output = BitstreamOutput {
-            bitstream,
+            bitstream: bitstream.clone(),
             bit_allocation,
             error_resilience_info: self.error_resilience.get_resilience_info(),
             streaming_info: self.streaming_optimizer.get_streaming_info(),
@@ -690,7 +690,7 @@ impl BiologicalBitstreamFormatter {
         let mut header = Vec::new();
 
         // Add section type
-        header.push(section.section_type as u8);
+        header.push(section.section_type.clone() as u8);
 
         // Add section size
         let section_size = section.size() as u32;

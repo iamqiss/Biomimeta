@@ -56,7 +56,7 @@ use std::thread;
 use std::sync::mpsc;
 
 use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock as AsyncRwLock;
+// use tokio::sync::RwLock as AsyncRwLock; // Disabled for compatibility
 
 use crate::AfiyahError;
 

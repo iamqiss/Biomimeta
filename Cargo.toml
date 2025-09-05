@@ -99,6 +99,16 @@ name = "complete_codec_demo"
 path = "examples/complete_codec_demo.rs"
 required-features = ["basic-biology"]
 
+[[example]]
+name = "phase1_demo"
+path = "examples/phase1_demo.rs"
+required-features = ["basic-biology", "gpu-acceleration"]
+
+[[example]]
+name = "simple_phase1_test"
+path = "examples/simple_phase1_test.rs"
+required-features = ["basic-biology", "gpu-acceleration"]
+
 [[bench]]
 name = "retinal_processing"
 path = "benches/retinal_processing.rs"

@@ -527,7 +527,7 @@ impl QuantumSuperpositionCompressor {
                 decoherence_effect: 1.0 - state.coherence,
             };
             
-            results.push(result);
+            results.push(result.clone());
             self.entanglement_network.measurement_history.push(result);
         }
         
@@ -1126,7 +1126,7 @@ impl AdaptiveEntropyCoder {
             let model = self.get_or_create_context_model(&context_key);
             
             // Encode byte using context model
-            let encoded_byte = self.encode_byte_with_model(byte, model)?;
+            let encoded_byte = self.encode_byte_with_model(byte, &model)?;
             encoded.push(encoded_byte);
             
             // Update context
@@ -1180,7 +1180,7 @@ impl AdaptiveEntropyCoder {
             let model = self.get_or_create_context_model(&context_key);
             
             // Decode byte using context model
-            let decoded_byte = self.decode_byte_with_model(encoded_byte, model)?;
+            let decoded_byte = self.decode_byte_with_model(encoded_byte, &model)?;
             decoded.push(decoded_byte);
             
             // Update context

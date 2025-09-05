@@ -50,7 +50,7 @@
 //! - Optimized memory access patterns for biological data structures
 
 use std::arch::x86_64::*;
-use std::arch::aarch64::*;
+// use std::arch::aarch64::*; // ARM64 SIMD - disabled for compatibility
 use std::time::{Duration, Instant};
 use std::sync::{Arc, Mutex};
 

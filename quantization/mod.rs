@@ -1013,7 +1013,7 @@ impl AdaptiveQuantizer {
 }
 
 // Placeholder implementations for content analysis components
-pub struct VisualContentAnalyzer;
+pub struct VisualContentAnalyzerV2;
 pub struct BiologicalEdgeDetector;
 pub struct TextureAnalyzer;
 pub struct FrequencyAnalyzer;

@@ -47,11 +47,13 @@ use crate::AfiyahError;
 pub mod gpu_acceleration;
 pub mod simd_optimization;
 pub mod neuromorphic_interfaces;
+pub mod cuda_kernels;
 
 // Re-export the main types
 pub use gpu_acceleration::{GPUAccelerator, CudaKernel, OpenCLKernel};
 pub use simd_optimization::{SIMDOptimizer, SIMDConfig, SIMDArchitecture};
 pub use neuromorphic_interfaces::{NeuromorphicInterface, NeuromorphicConfig, NeuromorphicHardware};
+pub use cuda_kernels::{CudaContext, CudaKernel as NewCudaKernel, CudaKernelParams};
 
 /// Hardware acceleration manager
 pub struct HardwareAccelerator {
