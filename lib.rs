@@ -100,6 +100,9 @@ pub mod motion_estimation;
 pub mod quantization;
 pub mod bitstream_formatting;
 
+// Quality metrics system
+pub mod quality_metrics;
+
 // External dependencies
 use ndarray::{Array2, Array3, s};
 
@@ -124,6 +127,16 @@ pub use motion_estimation::{BiologicalMotionEstimator, MotionEstimationConfig, M
 pub use quantization::{BiologicalQuantizer, QuantizationConfig, QuantizerType, QuantizationResult};
 pub use bitstream_formatting::{BiologicalBitstreamFormatter, BitstreamConfig, BitstreamOutput, CompressionData};
 
+// Quality metrics system
+pub use quality_metrics::{
+    QualityMetricsEngine, QualityConfig, QualityMetrics, QualityBreakdown, BiologicalBreakdown,
+    TemporalMetrics, SpatialMetrics, QualityTrend, TrendDirection,
+    PSNRCalculator, SSIMCalculator, MSSSIMCalculator,
+    BiologicalAccuracyAssessor, BiologicalAccuracyConfig, BiologicalAccuracyResult,
+    SubjectiveTestingEngine, SubjectiveTestingConfig, TestType, Participant, TestSession, 
+    TestStimulus, TestResponse, TestAnalysis, ParticipantStatistics
+};
+
 /// Main compression engine that orchestrates all biological components
 pub struct CompressionEngine {
     retinal_processor: RetinalProcessor,
@@ -135,6 +148,7 @@ pub struct CompressionEngine {
     medical_processor: MedicalProcessor,
     performance_optimizer: PerformanceOptimizer,
     ultra_high_resolution_processor: UltraHighResolutionProcessor,
+    quality_metrics_engine: QualityMetricsEngine,
     // Core compression components
     entropy_coder: BiologicalEntropyCoder,
     transform_coder: BiologicalTransformCoder,
@@ -183,6 +197,7 @@ impl CompressionEngine {
         let medical_processor = MedicalProcessor::new()?;
         let performance_optimizer = PerformanceOptimizer::new()?;
         let ultra_high_resolution_processor = UltraHighResolutionProcessor::new()?;
+        let quality_metrics_engine = QualityMetricsEngine::new(QualityConfig::default())?;
 
         // Initialize core compression components
         let entropy_coder = BiologicalEntropyCoder::new(EntropyCodingConfig::default())?;
@@ -201,6 +216,7 @@ impl CompressionEngine {
             medical_processor,
             performance_optimizer,
             ultra_high_resolution_processor,
+            quality_metrics_engine,
             entropy_coder,
             transform_coder,
             motion_estimator,
@@ -337,10 +353,24 @@ impl CompressionEngine {
         self
     }
 
-    /// Configure temporal integration
-    pub fn with_temporal_integration(mut self, ms: u64) -> Self {
-        self.config.temporal_integration_ms = ms;
-        self
+    /// Assesses quality of compressed content
+    pub fn assess_quality(&mut self, reference: &Array2<f64>, processed: &Array2<f64>) -> Result<QualityMetrics, AfiyahError> {
+        self.quality_metrics_engine.assess_quality(reference, processed)
+    }
+
+    /// Gets quality metrics history
+    pub fn get_quality_history(&self) -> Result<Vec<QualityMetrics>, AfiyahError> {
+        self.quality_metrics_engine.get_quality_history()
+    }
+
+    /// Gets average quality over time window
+    pub fn get_average_quality(&self, time_window: Duration) -> Result<f64, AfiyahError> {
+        self.quality_metrics_engine.get_average_quality(time_window)
+    }
+
+    /// Gets quality trend analysis
+    pub fn get_quality_trend(&self, window_size: usize) -> Result<QualityTrend, AfiyahError> {
+        self.quality_metrics_engine.get_quality_trend(window_size)
     }
 }
 
