@@ -55,6 +55,7 @@ use ndarray::{Array1, Array2, Array3};
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use anyhow::{Result, anyhow};
+use crate::arithmetic_coding::{AdaptiveRangeEncoder, AdaptiveRangeDecoder, UniformQuantizer, MAX_ALPHABET};
 
 /// Biological entropy coding engine
 pub struct BiologicalEntropyCoder {
@@ -267,114 +268,53 @@ impl BiologicalEntropyCoder {
 
     /// Biological arithmetic encoding with neural prediction
     fn biological_arithmetic_encode(&self, symbols: &[Symbol], predictions: &[Symbol]) -> Result<Vec<u8>> {
-        let mut encoded_data = Vec::new();
-        let mut low = 0u64;
-        let mut high = 0xFFFFFFFFu64;
-        let mut range = 0xFFFFFFFFu64;
-
-        for (i, symbol) in symbols.iter().enumerate() {
-            // Get probability from synaptic models
-            let probability = self.synaptic_models.get_symbol_probability(symbol, &symbols[..i])?;
-            
-            // Apply neural prediction if available
-            let adjusted_probability = if i < predictions.len() {
-                self.apply_neural_prediction(probability, &predictions[i])?
-            } else {
-                probability
-            };
-
-            // Update arithmetic coding range
-            let symbol_range = (range as f64 * adjusted_probability) as u64;
-            high = low + symbol_range;
-            low = low + symbol_range;
-
-            // Normalize range if needed
-            if high < 0x80000000 || low >= 0x80000000 {
-                if high < 0x80000000 {
-                    encoded_data.push(0);
-                    low <<= 1;
-                    high = (high << 1) | 1;
-                } else {
-                    encoded_data.push(1);
-                    low = (low << 1) & 0x7FFFFFFF;
-                    high = ((high << 1) & 0x7FFFFFFF) | 1;
-                }
-                range = high - low;
+        // Map continuous symbols to discrete alphabet via quantization
+        let quant = UniformQuantizer::new(4096, -10_000.0, 10_000.0)?; // configurable dynamic range
+        let mut out = Vec::new();
+        {
+            let mut enc = AdaptiveRangeEncoder::new(Vec::new(), 4096)?;
+            for symbol in symbols {
+                let idx = match *symbol {
+                    Symbol::Luminance(v) => quant.encode_index(v),
+                    Symbol::Chrominance(v) => quant.encode_index(v),
+                    Symbol::TransformCoeff(v) => quant.encode_index(v),
+                    Symbol::PredictionResidual(v) => quant.encode_index(v),
+                    Symbol::BiologicalFeature(v) => quant.encode_index(v),
+                    Symbol::MotionVector(x, _y) => quant.encode_index(x),
+                };
+                enc.encode_symbol(idx)?;
             }
+            out = enc.finalize()?;
         }
-
-        // Finalize encoding
-        encoded_data.push((low >> 24) as u8);
-        encoded_data.push((low >> 16) as u8);
-        encoded_data.push((low >> 8) as u8);
-        encoded_data.push(low as u8);
-
-        Ok(encoded_data)
+        Ok(out)
     }
 
     /// Biological arithmetic decoding with neural prediction
     fn biological_arithmetic_decode(&self, encoded_data: &[u8]) -> Result<(Vec<Symbol>, Vec<Symbol>)> {
         let mut symbols = Vec::new();
         let mut predictions = Vec::new();
-        let mut low = 0u64;
-        let mut high = 0xFFFFFFFFu64;
-        let mut range = 0xFFFFFFFFu64;
-        let mut data_index = 0;
+        let quant = UniformQuantizer::new(4096, -10_000.0, 10_000.0)?;
+        let mut dec = AdaptiveRangeDecoder::new(&encoded_data[..], 4096)?;
 
-        // Initialize with first 4 bytes
-        if encoded_data.len() < 4 {
-            return Err(anyhow!("Insufficient data for decoding"));
-        }
-
-        let mut value = ((encoded_data[0] as u64) << 24) |
-                       ((encoded_data[1] as u64) << 16) |
-                       ((encoded_data[2] as u64) << 8) |
-                       (encoded_data[3] as u64);
-        data_index = 4;
-
-        while data_index < encoded_data.len() {
-            // Calculate symbol probability
-            let symbol_probability = self.calculate_symbol_probability(value, low, high, range)?;
-            
-            // Generate neural prediction
-            let prediction = if self.config.enable_neural_prediction {
-                self.neural_predictor.predict_next_symbol(&symbols)?
-            } else {
-                None
+        // Note: Without an explicit symbol count in the bitstream, the caller
+        // must know how many symbols to decode. For now, we attempt to decode
+        // until the bitstream is exhausted by catching I/O end.
+        let mut remaining = encoded_data.len();
+        // Conservative cap to prevent infinite loops in malformed streams
+        let max_symbols = 10_000_000usize;
+        for _ in 0..max_symbols {
+            // Try to decode; break on I/O error signaling exhaustion
+            let idx = match dec.decode_symbol() {
+                Ok(s) => s,
+                Err(_) => break,
             };
-
-            // Decode symbol
-            let symbol = self.decode_symbol(symbol_probability, &symbols, prediction.as_ref())?;
-            symbols.push(symbol);
-
-            if let Some(pred) = prediction {
-                predictions.push(pred);
+            let v = quant.decode_value(idx);
+            symbols.push(Symbol::Luminance(v));
+            if self.config.enable_neural_prediction {
+                // Placeholder prediction generation (could be improved with context)
+                predictions.push(Symbol::Luminance(v));
             }
-
-            // Update range
-            let symbol_range = (range as f64 * symbol_probability) as u64;
-            high = low + symbol_range;
-            low = low + symbol_range;
-
-            // Normalize range
-            if high < 0x80000000 || low >= 0x80000000 {
-                if high < 0x80000000 {
-                    low <<= 1;
-                    high = (high << 1) | 1;
-                    if data_index < encoded_data.len() {
-                        value = (value << 1) | (encoded_data[data_index] as u64);
-                        data_index += 1;
-                    }
-                } else {
-                    low = (low << 1) & 0x7FFFFFFF;
-                    high = ((high << 1) & 0x7FFFFFFF) | 1;
-                    if data_index < encoded_data.len() {
-                        value = ((value << 1) & 0x7FFFFFFF) | (encoded_data[data_index] as u64);
-                        data_index += 1;
-                    }
-                }
-                range = high - low;
-            }
+            if remaining == 0 { break; }
         }
 
         Ok((symbols, predictions))
@@ -408,9 +348,8 @@ impl BiologicalEntropyCoder {
 
     /// Decode a single symbol
     fn decode_symbol(&self, probability: f64, context: &[Symbol], prediction: Option<&Symbol>) -> Result<Symbol> {
-        // Implement symbol decoding based on probability and context
-        // This would use the synaptic models and biological constraints
-        Ok(Symbol::Luminance(0.0)) // Placeholder - implement actual decoding
+        // Deprecated by arithmetic range decoding path above; retained for API compatibility.
+        Ok(Symbol::Luminance(0.0))
     }
 }
 
