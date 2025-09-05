@@ -94,6 +94,11 @@ name = "biological_validation"
 path = "examples/biological_validation.rs"
 required-features = ["bio-validation"]
 
+[[example]]
+name = "complete_codec_demo"
+path = "examples/complete_codec_demo.rs"
+required-features = ["basic-biology"]
+
 [[bench]]
 name = "retinal_processing"
 path = "benches/retinal_processing.rs"
