@@ -86,6 +86,7 @@ pub mod streaming_engine;
 pub mod multi_modal_integration;
 pub mod experimental_features;
 pub mod hardware_acceleration;
+pub mod real_time_adaptation;
 pub mod medical_applications;
 pub mod performance_optimization;
 pub mod utilities;
@@ -100,6 +101,7 @@ pub use streaming_engine::{StreamingEngine, AdaptiveStreamer, BiologicalQoS, Str
 pub use multi_modal_integration::{MultiModalProcessor, IntegrationParams};
 pub use experimental_features::{ExperimentalProcessor, ExperimentalConfig};
 pub use hardware_acceleration::{HardwareAccelerator, AccelerationConfig, GPUAccelerator, SIMDOptimizer, NeuromorphicInterface};
+pub use real_time_adaptation::{RealTimeAdaptationProcessor, AdaptationOutput, AdaptationConfig, ContentAnalyzer, ViewerBehaviorTracker, AdaptationController, ParameterOptimizer, PerformanceMonitor};
 pub use medical_applications::{MedicalProcessor, MedicalConfig, DiagnosticTool, RetinalDiseaseModel, ClinicalValidator};
 pub use performance_optimization::{PerformanceOptimizer, OptimizationConfig, BenchmarkSuite, Profiler, RealTimeProcessor};
 
