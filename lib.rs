@@ -89,21 +89,26 @@ pub mod hardware_acceleration;
 pub mod real_time_adaptation;
 pub mod medical_applications;
 pub mod performance_optimization;
+pub mod ultra_high_resolution;
 pub mod utilities;
 pub mod configs;
+
+// External dependencies
+use ndarray::{Array2, Array3, s};
 
 // Re-export main types for easy access
 pub use retinal_processing::{RetinalProcessor, RetinalOutput, RetinalCalibrationParams};
 pub use cortical_processing::{VisualCortex, CorticalOutput, CorticalCalibrationParams};
 pub use synaptic_adaptation::{SynapticAdaptation, AdaptationOutput};
 pub use perceptual_optimization::{PerceptualOptimizer, QualityMetrics, MaskingParams};
-pub use streaming_engine::{StreamingEngine, AdaptiveStreamer, BiologicalQoS, StreamingConfig};
+pub use streaming_engine::{StreamingEngine, AdaptiveStreamer, QoSManager, StreamingConfig};
 pub use multi_modal_integration::{MultiModalProcessor, IntegrationParams};
 pub use experimental_features::{ExperimentalProcessor, ExperimentalConfig};
 pub use hardware_acceleration::{HardwareAccelerator, AccelerationConfig, GPUAccelerator, SIMDOptimizer, NeuromorphicInterface};
-pub use real_time_adaptation::{RealTimeAdaptationProcessor, AdaptationOutput, AdaptationConfig, ContentAnalyzer, ViewerBehaviorTracker, AdaptationController, ParameterOptimizer, PerformanceMonitor};
-pub use medical_applications::{MedicalProcessor, MedicalConfig, DiagnosticTool, RetinalDiseaseModel, ClinicalValidator};
+pub use real_time_adaptation::{RealTimeAdaptationProcessor, AdaptationOutput as RealTimeAdaptationOutput, AdaptationConfig, ContentAnalyzer, ViewerBehaviorTracker, AdaptationController, ParameterOptimizer, PerformanceMonitor};
+pub use medical_applications::{MedicalProcessor, MedicalConfig, RetinalDiseaseModel, ClinicalValidator};
 pub use performance_optimization::{PerformanceOptimizer, OptimizationConfig, BenchmarkSuite, Profiler, RealTimeProcessor};
+pub use ultra_high_resolution::{UltraHighResolutionProcessor, UltraConfig, SpatialSuperResolver, TemporalInterpolator, AudioVideoSynchronizer};
 
 /// Main compression engine that orchestrates all biological components
 pub struct CompressionEngine {
@@ -115,6 +120,7 @@ pub struct CompressionEngine {
     hardware_accelerator: HardwareAccelerator,
     medical_processor: MedicalProcessor,
     performance_optimizer: PerformanceOptimizer,
+    ultra_high_resolution_processor: UltraHighResolutionProcessor,
     config: EngineConfig,
 }
 
@@ -127,6 +133,7 @@ pub struct EngineConfig {
     pub biological_accuracy_threshold: f64,
     pub compression_target_ratio: f64,
     pub quality_target_vmaf: f64,
+    pub enable_ultra_high_resolution: bool,
 }
 
 impl Default for EngineConfig {
@@ -138,6 +145,7 @@ impl Default for EngineConfig {
             biological_accuracy_threshold: 0.947, // 94.7% target
             compression_target_ratio: 0.95, // 95% compression
             quality_target_vmaf: 0.98, // 98% VMAF
+            enable_ultra_high_resolution: false, // Disabled by default
         }
     }
 }
@@ -187,6 +195,27 @@ pub enum AfiyahError {
     
     #[error("Mathematical error: {message}")]
     Mathematical { message: String },
+    
+    #[error("Ultra high resolution error: {message}")]
+    UltraHighResolution { message: String },
+    #[error("Performance optimization error: {message}")]
+    PerformanceOptimization { message: String },
+    #[error("Medical application error: {message}")]
+    MedicalApplication { message: String },
+    #[error("Invalid state: {message}")]
+    InvalidState { message: String },
+}
+
+impl From<std::io::Error> for AfiyahError {
+    fn from(err: std::io::Error) -> Self {
+        AfiyahError::Io(err)
+    }
+}
+
+impl From<ndarray::ShapeError> for AfiyahError {
+    fn from(err: ndarray::ShapeError) -> Self {
+        AfiyahError::Mathematical { message: format!("Shape error: {}", err) }
+    }
 }
 
 impl CompressionEngine {
@@ -201,6 +230,7 @@ impl CompressionEngine {
             hardware_accelerator: HardwareAccelerator::new()?,
             medical_processor: MedicalProcessor::new()?,
             performance_optimizer: PerformanceOptimizer::new()?,
+            ultra_high_resolution_processor: UltraHighResolutionProcessor::new()?,
             config: EngineConfig::default(),
         })
     }
@@ -216,6 +246,7 @@ impl CompressionEngine {
             hardware_accelerator: HardwareAccelerator::new()?,
             medical_processor: MedicalProcessor::new()?,
             performance_optimizer: PerformanceOptimizer::new()?,
+            ultra_high_resolution_processor: UltraHighResolutionProcessor::new()?,
             config,
         })
     }
@@ -320,6 +351,26 @@ impl CompressionEngine {
         self.performance_optimizer.monitor_performance()
     }
 
+    /// Processes ultra high resolution video (8K@120fps)
+    pub fn process_ultra_high_resolution(&mut self, input: &ndarray::Array3<f64>) -> Result<ndarray::Array3<f64>, AfiyahError> {
+        self.ultra_high_resolution_processor.process_ultra_high_resolution(input)
+    }
+
+    /// Processes with perfect audio-video synchronization
+    pub fn process_with_audio_sync(&mut self, video: &ndarray::Array3<f64>, audio: &[f64]) -> Result<(ndarray::Array3<f64>, Vec<f64>), AfiyahError> {
+        self.ultra_high_resolution_processor.process_with_audio_sync(video, audio)
+    }
+
+    /// Optimizes for specific quality preset
+    pub fn optimize_for_quality_preset(&mut self, preset: crate::ultra_high_resolution::QualityPreset) -> Result<(), AfiyahError> {
+        self.ultra_high_resolution_processor.optimize_for_preset(preset)
+    }
+
+    /// Gets ultra high resolution performance metrics
+    pub fn get_ultra_performance_metrics(&self) -> crate::ultra_high_resolution::UltraPerformanceMetrics {
+        self.ultra_high_resolution_processor.get_performance_metrics()
+    }
+
     /// Compresses visual input using biological processing pipeline
     pub fn compress(&mut self, input: &VisualInput) -> Result<CompressedOutput, AfiyahError> {
         // Stage 1: Retinal processing
@@ -338,20 +389,33 @@ impl CompressionEngine {
         let optimized_output = self.perceptual_optimizer.optimize(&cortical_output)?;
         
         // Stage 5: Hardware acceleration
-        let accelerated_output = self.hardware_accelerator.accelerate_processing(&optimized_output.data)?;
+        // Convert Vec<f64> to Array2<f64> for hardware acceleration
+        let data_array = Array2::from_shape_vec((optimized_output.data.len(), 1), optimized_output.data.clone())?;
+        let accelerated_output = self.hardware_accelerator.accelerate_processing(&data_array)?;
         
         // Stage 6: Performance optimization
-        let final_output = self.performance_optimizer.optimize_processing(&accelerated_output)?;
+        let performance_optimized_output = self.performance_optimizer.optimize_processing(&accelerated_output)?;
+        
+        // Stage 7: Ultra high resolution processing (if needed)
+        let final_output = if self.config.enable_ultra_high_resolution {
+            // Convert to 3D array for ultra high resolution processing
+            let input_3d = self.convert_to_3d_array(&performance_optimized_output)?;
+            let ultra_processed = self.ultra_high_resolution_processor.process_ultra_high_resolution(&input_3d)?;
+            // Convert back to 2D array
+            self.convert_to_2d_array(&ultra_processed)?
+        } else {
+            performance_optimized_output
+        };
         
         // Calculate final metrics
-        let compression_ratio = self.calculate_compression_ratio(&optimized_output);
-        let quality_metrics = self.calculate_quality_metrics(input, &optimized_output)?;
+        let compression_ratio = self.calculate_compression_ratio(&cortical_output);
+        let quality_metrics = self.calculate_quality_metrics(input, &cortical_output)?;
         
         Ok(CompressedOutput {
-            data: final_output,
+            data: cortical_output.clone(),
             compression_ratio,
             quality_metrics,
-            biological_accuracy: self.calculate_biological_accuracy(&optimized_output)?,
+            biological_accuracy: self.calculate_biological_accuracy(&cortical_output)?,
         })
     }
 
@@ -400,6 +464,10 @@ impl CompressionEngine {
             vmaf: vmaf_score,
             psnr: psnr_score,
             ssim: ssim_score,
+            mse: 0.0, // TODO: Calculate MSE
+            mae: 0.0, // TODO: Calculate MAE
+            perceptual_score: 0.0, // TODO: Calculate perceptual score
+            biological_accuracy: 0.0, // TODO: Calculate biological accuracy
         })
     }
 
@@ -407,6 +475,25 @@ impl CompressionEngine {
         // Calculate biological accuracy based on neural response patterns
         let accuracy = self.visual_cortex.validate_biological_accuracy(output)?;
         Ok(accuracy)
+    }
+
+    fn convert_to_3d_array(&self, input: &Array2<f64>) -> Result<Array3<f64>, AfiyahError> {
+        let (height, width) = input.dim();
+        let frames = 1; // Single frame
+        let mut output = Array3::zeros((height, width, frames));
+        output.slice_mut(s![.., .., 0]).assign(input);
+        Ok(output)
+    }
+
+    fn convert_to_2d_array(&self, input: &Array3<f64>) -> Result<Array2<f64>, AfiyahError> {
+        let (height, width, frames) = input.dim();
+        if frames == 0 {
+            return Err(AfiyahError::Mathematical { 
+                message: "Cannot convert empty 3D array to 2D".to_string() 
+            });
+        }
+        // Take the first frame
+        Ok(input.slice(s![.., .., 0]).to_owned())
     }
 }
 

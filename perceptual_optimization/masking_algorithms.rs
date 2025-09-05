@@ -109,7 +109,7 @@ impl MaskingAlgorithm {
         Ok(masked_input)
     }
 
-    fn create_contrast_sensitivity_function() -> Result<Array2<f64>, AfiyahError> {
+    fn create_contrast_sensitivity_function(&self) -> Result<Array2<f64>, AfiyahError> {
         // Create contrast sensitivity function based on human visual system
         let height = 64;
         let width = 64;

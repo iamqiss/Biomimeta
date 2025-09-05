@@ -345,7 +345,7 @@ impl Profiler {
     fn calculate_performance_profile(&self, session: &ProfileSession, memory_profile: &MemoryProfile, cpu_profile: &CpuProfile) -> Result<PerformanceProfile, AfiyahError> {
         let mut bottlenecks = Vec::new();
         let mut recommendations = Vec::new();
-        let mut performance_score = 100.0;
+        let mut performance_score: f64 = 100.0;
 
         // Check for memory bottlenecks
         if memory_profile.peak_usage > self.profile_config.memory_threshold_mb {

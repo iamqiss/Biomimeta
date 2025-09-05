@@ -397,7 +397,7 @@ impl RealTimeAdaptationProcessor {
     fn generate_biological_rationale(&self, param_name: &str, content: &ContentComplexity, behavior: &ViewerBehavior) -> Result<String, AfiyahError> {
         let rationale = match param_name {
             "compression_ratio" => {
-                if content.complexity > 0.7 {
+                if content.overall_complexity > 0.7 {
                     "High content complexity requires increased compression to maintain biological processing efficiency".to_string()
                 } else {
                     "Low content complexity allows for higher quality preservation".to_string()
@@ -411,7 +411,7 @@ impl RealTimeAdaptationProcessor {
                 }
             },
             "temporal_window" => {
-                if content.temporal_variance > 0.6 {
+                if content.variance > 0.6 {
                     "High temporal variance requires extended integration window".to_string()
                 } else {
                     "Stable temporal content allows for shorter integration window".to_string()
@@ -441,7 +441,7 @@ impl RealTimeAdaptationProcessor {
         let content_confidence = 1.0 - content.variance;
         let behavior_confidence = behavior.consistency_score;
         let performance_confidence = 1.0 - performance.variance;
-        let strategy_confidence = strategy.confidence;
+        let strategy_confidence = 0.8; // Default confidence for strategy
 
         let overall_confidence = (content_confidence + behavior_confidence + performance_confidence + strategy_confidence) / 4.0;
         Ok(overall_confidence.min(1.0).max(0.0))

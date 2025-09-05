@@ -1,6 +1,7 @@
 //! Clinical Validation Module
 
 use ndarray::Array2;
+use ndarray_stats::QuantileExt;
 use crate::AfiyahError;
 
 /// Clinical validator for validating medical applications
@@ -406,7 +407,7 @@ impl ClinicalValidator {
         let mut tp = 0;
         let mut fp = 0;
         let mut tn = 0;
-        let mut fn = 0;
+        let mut false_negatives = 0;
 
         let threshold = 0.5;
 
@@ -418,7 +419,7 @@ impl ClinicalValidator {
                 match (input_val, truth_val) {
                     (true, true) => tp += 1,
                     (true, false) => fp += 1,
-                    (false, true) => fn += 1,
+                    (false, true) => false_negatives += 1,
                     (false, false) => tn += 1,
                 }
             }
@@ -426,7 +427,7 @@ impl ClinicalValidator {
 
         // Calculate metrics
         let accuracy = (tp + tn) as f64 / total_pixels as f64;
-        let sensitivity = if tp + fn > 0 { tp as f64 / (tp + fn) as f64 } else { 0.0 };
+        let sensitivity = if tp + false_negatives > 0 { tp as f64 / (tp + false_negatives) as f64 } else { 0.0 };
         let specificity = if tn + fp > 0 { tn as f64 / (tn + fp) as f64 } else { 0.0 };
         let precision = if tp + fp > 0 { tp as f64 / (tp + fp) as f64 } else { 0.0 };
         let recall = sensitivity;
@@ -443,10 +444,10 @@ impl ClinicalValidator {
         let auprc = self.calculate_auprc(input, ground_truth)?;
         
         // Calculate MCC
-        let mcc = self.calculate_mcc(tp, fp, tn, fn)?;
+        let mcc = self.calculate_mcc(tp, fp, tn, false_negatives)?;
         
         // Calculate Kappa
-        let kappa = self.calculate_kappa(tp, fp, tn, fn)?;
+        let kappa = self.calculate_kappa(tp, fp, tn, false_negatives)?;
 
         Ok(ClinicalMetrics {
             accuracy,
@@ -547,11 +548,11 @@ impl ClinicalValidator {
         Ok(auprc)
     }
 
-    fn calculate_mcc(&self, tp: usize, fp: usize, tn: usize, fn: usize) -> Result<f64, AfiyahError> {
+    fn calculate_mcc(&self, tp: usize, fp: usize, tn: usize, false_negatives: usize) -> Result<f64, AfiyahError> {
         let tp_f = tp as f64;
         let fp_f = fp as f64;
         let tn_f = tn as f64;
-        let fn_f = fn as f64;
+        let fn_f = false_negatives as f64;
 
         let numerator = tp_f * tn_f - fp_f * fn_f;
         let denominator = ((tp_f + fp_f) * (tp_f + fn_f) * (tn_f + fp_f) * (tn_f + fn_f)).sqrt();
@@ -563,14 +564,14 @@ impl ClinicalValidator {
         }
     }
 
-    fn calculate_kappa(&self, tp: usize, fp: usize, tn: usize, fn: usize) -> Result<f64, AfiyahError> {
-        let total = tp + fp + tn + fn;
+    fn calculate_kappa(&self, tp: usize, fp: usize, tn: usize, false_negatives: usize) -> Result<f64, AfiyahError> {
+        let total = tp + fp + tn + false_negatives;
         if total == 0 {
             return Ok(0.0);
         }
 
         let po = (tp + tn) as f64 / total as f64;
-        let pe = ((tp + fp) as f64 * (tp + fn) as f64 + (tn + fp) as f64 * (tn + fn) as f64) / (total * total) as f64;
+        let pe = ((tp + fp) as f64 * (tp + false_negatives) as f64 + (tn + fp) as f64 * (tn + false_negatives) as f64) / (total * total) as f64;
 
         if pe < 1.0 {
             Ok((po - pe) / (1.0 - pe))
@@ -760,11 +761,11 @@ impl ClinicalValidator {
                 Ok(mean_value)
             },
             "Sensitivity" => {
-                let max_value = input.max().unwrap_or(0.0);
+                let max_value = *input.max().unwrap_or(&0.0);
                 Ok(max_value)
             },
             "Specificity" => {
-                let min_value = input.min().unwrap_or(0.0);
+                let min_value = *input.min().unwrap_or(&0.0);
                 Ok(1.0 - min_value)
             },
             "Clinical_Evaluation" => {

@@ -1,6 +1,7 @@
 //! Diagnostic Tools Module
 
 use ndarray::Array2;
+use ndarray_stats::QuantileExt;
 use crate::AfiyahError;
 
 /// Disease types that can be diagnosed
@@ -289,7 +290,7 @@ impl DiagnosticTool {
             },
             "cup_to_disc_ratio" => {
                 // Simulate cup-to-disc ratio calculation
-                let max_value = input.max().unwrap_or(0.0);
+                let max_value = *input.max().unwrap_or(&0.0);
                 Ok(max_value * params[1])
             },
             _ => Ok(0.0),
@@ -338,7 +339,7 @@ impl DiagnosticTool {
             },
             "nerve_fiber_layer" => {
                 // Simulate nerve fiber layer analysis
-                let max_value = input.max().unwrap_or(0.0);
+                let max_value = *input.max().unwrap_or(&0.0);
                 Ok(max_value * params[1])
             },
             _ => Ok(0.0),

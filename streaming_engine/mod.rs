@@ -51,7 +51,7 @@ pub mod frame_scheduler;
 
 // Re-export the main types
 pub use adaptive_streamer::{AdaptiveStreamer, StreamingConfig, StreamingState};
-pub use biological_qos::{BiologicalQoS, QoSManager, PerceptualQuality};
+pub use biological_qos::{QoSManager, PerceptualQuality};
 pub use foveated_encoder::{FoveatedEncoder, FoveatedConfig, EncodingRegion};
 pub use frame_scheduler::{FrameScheduler, SchedulerConfig, FramePriority};
 

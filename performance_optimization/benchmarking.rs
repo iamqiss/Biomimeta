@@ -182,13 +182,11 @@ impl BenchmarkSuite {
             let result = self.execute_benchmark(benchmark, input)?;
             let elapsed = start_time.elapsed().as_secs_f64();
 
-            if result.is_ok() {
-                times.push(elapsed);
-                successful_iterations += 1;
-            }
+            times.push(elapsed);
+            successful_iterations += 1;
 
             // Update metrics
-            self.update_metrics(&mut metrics, &result?);
+            self.update_metrics(&mut metrics, &result);
         }
 
         if times.is_empty() {
@@ -201,7 +199,7 @@ impl BenchmarkSuite {
         let total_time = times.iter().sum::<f64>();
         let average_time = total_time / times.len() as f64;
         let min_time = times.iter().fold(f64::INFINITY, |a, &b| a.min(b));
-        let max_time = times.iter().fold(0.0, |a, &b| a.max(b));
+        let max_time: f64 = times.iter().fold(0.0, |a, &b| a.max(b));
         let median_time = self.calculate_median(&times);
         let std_deviation = self.calculate_std_deviation(&times);
         let success_rate = successful_iterations as f64 / benchmark.iterations as f64;

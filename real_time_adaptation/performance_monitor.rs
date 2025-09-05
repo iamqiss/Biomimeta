@@ -370,17 +370,17 @@ impl PerformanceMonitor {
         
         // Calculate trends using linear regression
         self.performance_trends.efficiency_trend = self.calculate_trend(
-            &recent_metrics.iter().map(|m| m.efficiency).collect())?;
+            &recent_metrics.iter().map(|m| m.efficiency).collect::<Vec<f64>>())?;
         self.performance_trends.latency_trend = self.calculate_trend(
-            &recent_metrics.iter().map(|m| m.latency).collect())?;
+            &recent_metrics.iter().map(|m| m.latency).collect::<Vec<f64>>())?;
         self.performance_trends.memory_trend = self.calculate_trend(
-            &recent_metrics.iter().map(|m| m.memory_usage).collect())?;
+            &recent_metrics.iter().map(|m| m.memory_usage).collect::<Vec<f64>>())?;
         self.performance_trends.cpu_trend = self.calculate_trend(
-            &recent_metrics.iter().map(|m| m.cpu_usage).collect())?;
+            &recent_metrics.iter().map(|m| m.cpu_usage).collect::<Vec<f64>>())?;
         self.performance_trends.variance_trend = self.calculate_trend(
-            &recent_metrics.iter().map(|m| m.variance).collect())?;
+            &recent_metrics.iter().map(|m| m.variance).collect::<Vec<f64>>())?;
         self.performance_trends.throughput_trend = self.calculate_trend(
-            &recent_metrics.iter().map(|m| m.throughput).collect())?;
+            &recent_metrics.iter().map(|m| m.throughput).collect::<Vec<f64>>())?;
 
         Ok(())
     }

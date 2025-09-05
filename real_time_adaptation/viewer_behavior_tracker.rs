@@ -408,10 +408,10 @@ impl ViewerBehaviorTracker {
             .sum::<f64>() / attention_values.len() as f64;
 
         // Calculate engagement trend
-        let engagement_trend = self.calculate_trend(&recent_behaviors.iter().map(|b| b.engagement_score).collect())?;
+        let engagement_trend = self.calculate_trend(&recent_behaviors.iter().map(|b| b.engagement_score).collect::<Vec<f64>>())?;
 
         // Calculate cognitive load trend
-        let cognitive_load_trend = self.calculate_trend(&recent_behaviors.iter().map(|b| b.cognitive_load).collect())?;
+        let cognitive_load_trend = self.calculate_trend(&recent_behaviors.iter().map(|b| b.cognitive_load).collect::<Vec<f64>>())?;
 
         // Calculate behavior stability
         let behavior_stability = recent_behaviors.iter()
@@ -489,7 +489,7 @@ impl ViewerBehaviorTracker {
         }
 
         // Use trend analysis for attention prediction
-        let trend = self.calculate_trend(&behaviors.iter().map(|b| b.attention_level).collect())?;
+        let trend = self.calculate_trend(&behaviors.iter().map(|b| b.attention_level).collect::<Vec<f64>>())?;
         let current_attention = behaviors[0].attention_level;
         
         let predicted_attention = current_attention + trend * prediction_time;
@@ -502,7 +502,7 @@ impl ViewerBehaviorTracker {
         }
 
         // Use trend analysis for engagement prediction
-        let trend = self.calculate_trend(&behaviors.iter().map(|b| b.engagement_score).collect())?;
+        let trend = self.calculate_trend(&behaviors.iter().map(|b| b.engagement_score).collect::<Vec<f64>>())?;
         let current_engagement = behaviors[0].engagement_score;
         
         let predicted_engagement = current_engagement + trend * prediction_time;

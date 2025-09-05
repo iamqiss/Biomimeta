@@ -226,7 +226,14 @@ impl FrameScheduler {
             });
         } else {
             // High quality - use biological scheduling
-            self.schedule_biological()
+            return self.schedule_biological();
+        }
+        
+        // Return the first frame from the sorted queue
+        if let Some(frame) = self.frame_queue.pop() {
+            Ok(frame.data)
+        } else {
+            Ok(Vec::new())
         }
     }
 

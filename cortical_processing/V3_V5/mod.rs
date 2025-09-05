@@ -52,7 +52,7 @@ pub mod heading_direction;
 // Re-export the main types
 pub use motion_processing::{MotionDetector, MotionField, MotionVector};
 pub use depth_integration::{DepthProcessor, DepthMap, StereoDisparity};
-pub use object_recognition::{ObjectDetector, ObjectFeatures, ShapeAnalyzer};
+pub use object_recognition::{ObjectDetector, ObjectFeatures};
 pub use optic_flow::{OpticFlowProcessor, FlowField, FlowVector};
 pub use heading_direction::{HeadingDetector, HeadingVector, NavigationField};
 

@@ -366,7 +366,7 @@ impl LatencyTracker {
         
         // Update statistics
         self.average_latency = self.latency_history.iter().sum::<f64>() / self.latency_history.len() as f64;
-        self.peak_latency = self.latency_history.iter().fold(0.0, f64::max);
+        self.peak_latency = self.latency_history.iter().fold(0.0, |a, &b| a.max(b));
     }
 
     fn get_metrics(&self) -> LatencyMetrics {
@@ -431,7 +431,7 @@ impl ThroughputMonitor {
             
             // Update statistics
             self.average_throughput = self.throughput_history.iter().sum::<f64>() / self.throughput_history.len() as f64;
-            self.peak_throughput = self.throughput_history.iter().fold(0.0, f64::max);
+            self.peak_throughput = self.throughput_history.iter().fold(0.0, |a, &b| a.max(b));
         }
         
         self.last_update_time = now;

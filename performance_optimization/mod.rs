@@ -7,9 +7,9 @@ pub mod benchmarking;
 pub mod profiling;
 pub mod real_time_processing;
 
-use benchmarking::{BenchmarkSuite, BenchmarkResult, PerformanceMetrics};
-use profiling::{Profiler, ProfileResult, PerformanceProfile};
-use real_time_processing::{RealTimeProcessor, RealTimeConfig, LatencyMetrics};
+pub use benchmarking::{BenchmarkSuite, BenchmarkResult, PerformanceMetrics};
+pub use profiling::{Profiler, ProfileResult, PerformanceProfile};
+pub use real_time_processing::{RealTimeProcessor, RealTimeConfig, LatencyMetrics};
 
 /// Performance optimizer for comprehensive optimization
 pub struct PerformanceOptimizer {

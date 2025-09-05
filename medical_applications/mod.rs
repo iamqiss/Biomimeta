@@ -7,9 +7,9 @@ pub mod diagnostic_tools;
 pub mod retinal_disease_modeling;
 pub mod clinical_validation;
 
-use diagnostic_tools::{DiagnosticTool, DiagnosticResult, DiseaseType};
-use retinal_disease_modeling::{RetinalDiseaseModel, DiseaseProgression, TreatmentResponse};
-use clinical_validation::{ClinicalValidator, ValidationResult, ClinicalMetrics};
+pub use diagnostic_tools::{DiagnosticTool, DiagnosticResult, DiseaseType};
+pub use retinal_disease_modeling::{RetinalDiseaseModel, DiseaseProgression, TreatmentResponse};
+pub use clinical_validation::{ClinicalValidator, ValidationResult, ClinicalMetrics};
 
 /// Medical applications processor for diagnostic and therapeutic applications
 pub struct MedicalProcessor {

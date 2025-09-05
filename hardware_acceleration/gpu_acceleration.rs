@@ -130,7 +130,7 @@ impl GPUAccelerator {
 
     fn process_with_cuda(&mut self, output: &mut Array2<f64>) -> Result<(), AfiyahError> {
         // Simulate CUDA processing
-        for kernel in &self.cuda_kernels {
+        for kernel in &self.cuda_kernels.clone() {
             match kernel.kernel_name.as_str() {
                 "retinal_processing" => {
                     self.apply_retinal_processing_kernel(output)?;
@@ -150,7 +150,7 @@ impl GPUAccelerator {
 
     fn process_with_opencl(&mut self, output: &mut Array2<f64>) -> Result<(), AfiyahError> {
         // Simulate OpenCL processing
-        for kernel in &self.opencl_kernels {
+        for kernel in &self.opencl_kernels.clone() {
             match kernel.kernel_name.as_str() {
                 "perceptual_optimization" => {
                     self.apply_perceptual_optimization_kernel(output)?;

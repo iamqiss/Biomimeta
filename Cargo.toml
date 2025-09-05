@@ -14,6 +14,9 @@ name = "afiyah"
 path = "lib.rs"
 
 [dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+ndarray-stats = "0.5"
+rand = "0.8"
 # Core dependencies
 clap = { version = "4.5.4", features = ["derive"] }
 anyhow = "1.0"

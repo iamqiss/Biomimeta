@@ -267,8 +267,9 @@ impl SIMDOptimizer {
 
     /// Updates the SIMD configuration
     pub fn update_config(&mut self, config: SIMDConfig) {
+        let vector_width = config.vector_width;
         self.config = config;
-        self.vector_registers.resize(config.vector_width * 8, 0.0);
+        self.vector_registers.resize(vector_width * 8, 0.0);
     }
 
     /// Gets the cache line size

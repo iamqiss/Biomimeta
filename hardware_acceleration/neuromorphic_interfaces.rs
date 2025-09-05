@@ -312,19 +312,21 @@ impl NeuromorphicInterface {
 
     /// Updates the neuromorphic configuration
     pub fn update_config(&mut self, config: NeuromorphicConfig) {
+        let num_neurons = config.num_neurons;
+        let num_synapses = config.num_synapses;
         self.config = config;
         self.neurons.clear();
         self.synapses.clear();
 
         // Reinitialize with new config
-        for i in 0..config.num_neurons {
+        for i in 0..num_neurons {
             let threshold = 1.0 + (i as f64 * 0.1) % 0.5;
             self.neurons.push(NeuromorphicNeuron::new(i, threshold));
         }
 
-        for i in 0..config.num_synapses {
-            let pre_neuron = i % config.num_neurons;
-            let post_neuron = (i + 1) % config.num_neurons;
+        for i in 0..num_synapses {
+            let pre_neuron = i % num_neurons;
+            let post_neuron = (i + 1) % num_neurons;
             let weight = 0.1 + (i as f64 * 0.01) % 0.8;
             self.synapses.push(NeuromorphicSynapse::new(i, pre_neuron, post_neuron, weight));
         }
