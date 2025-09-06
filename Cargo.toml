@@ -85,6 +85,10 @@ name = "basic_compression"
 path = "examples/basic_compression.rs"
 
 [[example]]
+name = "phase2_demo"
+path = "examples/phase2_demo.rs"
+
+[[example]]
 name = "streaming_demo"
 path = "examples/streaming_demo.rs"
 required-features = ["streaming"]
