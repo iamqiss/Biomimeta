@@ -114,11 +114,24 @@ pub mod bitstream_formatting;
 #[path = "src/arithmetic_coding/mod.rs"]
 pub mod arithmetic_coding;
 
+// Phase 2 modules - Neural Networks, Quality Metrics, Hardware Abstraction, Streaming Protocols
+#[path = "src/neural_networks/mod.rs"]
+pub mod neural_networks;
+#[path = "src/perceptual_quality_metrics/mod.rs"]
+pub mod perceptual_quality_metrics;
+#[path = "src/hardware_abstraction/mod.rs"]
+pub mod hardware_abstraction;
+#[path = "src/streaming_protocols/mod.rs"]
+pub mod streaming_protocols;
+
 // Quality metrics system
 pub mod quality_metrics;
 
 // External dependencies
 use ndarray::{Array2, Array3, s};
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
+use uuid::Uuid;
 
 // Re-export main types for easy access
 pub use retinal_processing::{RetinalProcessor, RetinalOutput, RetinalCalibrationParams};
@@ -151,6 +164,33 @@ pub use quality_metrics::{
     TestStimulus, TestResponse, TestAnalysis, ParticipantStatistics
 };
 
+// Phase 2 re-exports
+pub use neural_networks::{
+    NeuralNetworkEngine, UpscalingModel, PredictionModel, AttentionModel, BiologicalModel,
+    UpscalingModelType, PredictionModelType, AttentionModelType, BiologicalModelType,
+    SRCnnModel, EDSRModel, LSTMModel, SelfAttentionModel, BiologicalCNNModel,
+    QualityMetrics as NeuralQualityMetrics, NeuralNetworkConfig
+};
+
+pub use perceptual_quality_metrics::{
+    PerceptualQualityEngine, VMAFCalculator, PSNRCalculator as PerceptualPSNRCalculator,
+    SSIMCalculator as PerceptualSSIMCalculator, BiologicalAccuracyCalculator,
+    PerceptualUniformityCalculator, QualityMetricsResult, QualityMetricsConfig
+};
+
+pub use hardware_abstraction::{
+    HardwareAbstractionLayer, HardwareDevice, DeviceType, DeviceCapabilities,
+    MemoryInfo, PerformanceInfo, Kernel, KernelParams, KernelResult,
+    MemoryHandle, AcceleratorType, AcceleratorMetrics, HardwareConfig
+};
+
+pub use streaming_protocols::{
+    StreamingProtocolsEngine, ProtocolAdapter, VideoStream, VideoFrame, PixelFormat,
+    StreamMetadata, QualityLevel, EncodedStream, LatencyCharacteristics,
+    BandwidthRequirements, StreamingConfig, StreamingProtocol,
+    HLSAdapter, DASHAdapter, WebRTCAdapter, RTMPAdapter, SRTAdapter, AfiyahAdapter
+};
+
 /// Main compression engine that orchestrates all biological components
 pub struct CompressionEngine {
     retinal_processor: RetinalProcessor,
@@ -163,6 +203,11 @@ pub struct CompressionEngine {
     performance_optimizer: PerformanceOptimizer,
     ultra_high_resolution_processor: UltraHighResolutionProcessor,
     quality_metrics_engine: QualityMetricsEngine,
+    // Phase 2 components
+    neural_networks: NeuralNetworkEngine,
+    perceptual_quality: PerceptualQualityEngine,
+    hardware_abstraction: HardwareAbstractionLayer,
+    streaming_protocols: StreamingProtocolsEngine,
     // Core compression components
     entropy_coder: BiologicalEntropyCoder,
     transform_coder: BiologicalTransformCoder,
@@ -213,6 +258,12 @@ impl CompressionEngine {
         let ultra_high_resolution_processor = UltraHighResolutionProcessor::new()?;
         let quality_metrics_engine = QualityMetricsEngine::new(QualityConfig::default())?;
 
+        // Initialize Phase 2 components
+        let neural_networks = NeuralNetworkEngine::new(NeuralNetworkConfig::default())?;
+        let perceptual_quality = PerceptualQualityEngine::new(QualityMetricsConfig::default())?;
+        let hardware_abstraction = HardwareAbstractionLayer::new(HardwareConfig::default())?;
+        let streaming_protocols = StreamingProtocolsEngine::new(StreamingConfig::default())?;
+
         // Initialize core compression components
         let entropy_coder = BiologicalEntropyCoder::new(EntropyCodingConfig::default())?;
         let transform_coder = BiologicalTransformCoder::new(TransformCodingConfig::default())?;
@@ -231,6 +282,12 @@ impl CompressionEngine {
             performance_optimizer,
             ultra_high_resolution_processor,
             quality_metrics_engine,
+            // Phase 2 components
+            neural_networks,
+            perceptual_quality,
+            hardware_abstraction,
+            streaming_protocols,
+            // Core compression components
             entropy_coder,
             transform_coder,
             motion_estimator,
@@ -385,6 +442,48 @@ impl CompressionEngine {
     /// Gets quality trend analysis
     pub fn get_quality_trend(&self, window_size: usize) -> Result<QualityTrend, AfiyahError> {
         self.quality_metrics_engine.get_quality_trend(window_size)
+    }
+
+    // === Phase 2 Methods ===
+
+    /// Upscales video using neural networks
+    pub fn upscale_video(&mut self, input: &VideoFrame, target_resolution: (u32, u32)) -> Result<VideoFrame, AfiyahError> {
+        self.neural_networks.upscale_video(input, target_resolution)
+    }
+
+    /// Predicts next frame using neural networks
+    pub fn predict_next_frame(&mut self, previous_frames: &[VideoFrame]) -> Result<VideoFrame, AfiyahError> {
+        self.neural_networks.predict_next_frame(previous_frames)
+    }
+
+    /// Assesses perceptual quality using advanced metrics
+    pub fn assess_perceptual_quality(&mut self, reference: &VideoFrame, processed: &VideoFrame) -> Result<QualityMetricsResult, AfiyahError> {
+        self.perceptual_quality.assess_quality(reference, processed)
+    }
+
+    /// Optimizes quality using biological feedback
+    pub fn optimize_quality(&mut self, target_quality: f64, current_params: &mut HashMap<String, f64>) -> Result<(), AfiyahError> {
+        self.perceptual_quality.optimize_quality(target_quality, current_params)
+    }
+
+    /// Executes compute task on optimal hardware
+    pub fn execute_compute_task(&mut self, task: Kernel) -> Result<KernelResult, AfiyahError> {
+        self.hardware_abstraction.execute_kernel(task)
+    }
+
+    /// Allocates memory on specific hardware
+    pub fn allocate_memory(&mut self, device_type: DeviceType, size_bytes: u64) -> Result<MemoryHandle, AfiyahError> {
+        self.hardware_abstraction.allocate_memory(device_type, size_bytes)
+    }
+
+    /// Starts streaming session
+    pub fn start_streaming(&mut self, protocol: StreamingProtocol, config: StreamingConfig) -> Result<Uuid, AfiyahError> {
+        self.streaming_protocols.start_stream(protocol, config)
+    }
+
+    /// Adapts stream quality based on network conditions
+    pub fn adapt_stream_quality(&mut self, stream_id: Uuid, network_conditions: NetworkConditions) -> Result<(), AfiyahError> {
+        self.streaming_protocols.adapt_stream(stream_id, network_conditions)
     }
 }
 
